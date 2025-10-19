@@ -1,0 +1,7 @@
+venv/
+.venv/
+__pycache__/
+.eggs
+templates/node_modules
+templates/package-lock.json
+templates/package.json
