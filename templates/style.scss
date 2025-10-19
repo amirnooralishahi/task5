@@ -1,0 +1,15 @@
+.list_product{ 
+    .add-min{ 
+        #plus{ 
+            &:hover{ 
+            cursor: pointer;
+
+            }
+        }
+        #min{ 
+            &:hover{ 
+                cursor: pointer;
+            }
+        }
+    }
+}
