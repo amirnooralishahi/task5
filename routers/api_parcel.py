@@ -71,10 +71,11 @@ async def all_list_product():
 
 
 
-@router.get('/invoice/{customer_id}')
-async def get_parcel_for_customer(customer_id: int):
-
-    query = RepositoryInvoice.select_where(RepositoryInvoice.field('customer_id') == customer_id).select('id')
+@router.get('/parcel-customer/')
+async def get_parcel_for_customer(name:str , last_name:str):
+    query_customer = RepositoryCustomer.select_where(RepositoryCustomer.field('name').eq(name)).where(RepositoryCustomer.field('last_name').eq(last_name))
+    execute_customer = await RepositoryCustomer.execute_and_fetch(query_customer)
+    query = RepositoryInvoice.select_where(RepositoryInvoice.field('customer_id') == execute_customer[0].get('id')).select('id')
     execute =await RepositoryInvoice.execute_and_fetch(query)
     invoice_id = execute[0].get('id')
     query_parcel= RepositoryParcel.select_where(RepositoryParcel.field('invoice_id').eq(invoice_id)).select('*')
@@ -82,8 +83,7 @@ async def get_parcel_for_customer(customer_id: int):
     show_list=[]
     for item in execute_parcel:
         saveParcelId = item['id']
-        saveTotalPrice = item['price']
-        getParcelItem = RepositoryItem.select_where(RepositoryItem.field('parcel_id').eq(saveParcelId)).select('*')
+        getParcelItem = RepositoryItem.select_where(RepositoryItem.field('id').eq(saveParcelId)).select('*')
         execute_item =await RepositoryItem.execute_and_fetch(getParcelItem)
         count = execute_item[0].get('count')
         get_product = RepositoryProduct.select_where(RepositoryProduct.field('id').eq(execute_item[0].get('product_id'))).select('*')
@@ -92,7 +92,7 @@ async def get_parcel_for_customer(customer_id: int):
         price = decimal.Decimal(execute_item[0].get('price'))
         show = ShowParcel(
             id_parcel= saveParcelId,
-            TotalPrice=saveTotalPrice,
+            TotalPrice=execute_parcel[0].get('price'),
             price=price,
             nameProduct=name,
             count=count,

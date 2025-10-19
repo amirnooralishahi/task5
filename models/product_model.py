@@ -14,7 +14,7 @@ class productModel(ModelAbstract):
     id: int
     name :str
     vendor_id :int
-    price : Decimal
+    price : int
 
     def vendor(self):
         return  self.relation('vendor')

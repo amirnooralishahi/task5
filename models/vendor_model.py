@@ -14,7 +14,7 @@ class vendor(ModelAbstract):
     name : str
     last_name : str
     phone : Optional[int]
-    balance: Optional[Decimal]
+    balance: Optional[int]
     national_code: Optional[int]
     city : Optional[str]
 

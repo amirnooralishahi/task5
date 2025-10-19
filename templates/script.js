@@ -140,5 +140,33 @@ fetch('http://127.0.0.1:8000/parcel/vendor/list_product/')
     });
 
 
+fetch(`http://127.0.0.1:8000/parcel/invoice/1`).then(res=>
+res.json()
+).then( 
+    (data)=>{ 
+        form_product= document.getElementById('product-customer')
+        const container = document.getElementById('parcel-customer')
+        var formCustomer = document.getElementById('product-customer')
+        var submit=container.querySelector('.but')
+        submit.addEventListener('click',async (event)=>{ 
+            event.preventDefault()
+        var formDataCustomer = new FormData(formCustomer)
+        var parcelProduct={}
+        console.log(formDataCustomer.entries());
+        
+        for(var[key,value] of formDataCustomer.entries() ){ 
+            parcelProduct[key]=value
+        }
+            console.log(parcelProduct);
+            
+
+        })
+        
+        // for (var i =0 ; i<res.length;i++){ 
+        //     document.createElement('div').innerHTML=
+            
+        // }        
+    }
+)
 
 
