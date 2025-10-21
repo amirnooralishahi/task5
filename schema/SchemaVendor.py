@@ -20,5 +20,5 @@ class ShowVendorSchema(BaseModel):
     id : int
     name : str
     last_name : str
-    phone : str
+    phone : int
     balance : Decimal

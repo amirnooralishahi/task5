@@ -13,3 +13,12 @@
         }
     }
 }
+.add-parcel{
+    &-container{ 
+        #choice-product{
+            &:hover{ 
+                cursor: pointer;
+            }
+        }
+    }
+}

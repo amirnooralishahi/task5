@@ -3,4 +3,8 @@
 }
 .list_product .add-min #min:hover {
   cursor: pointer;
+}
+
+.add-parcel-container #choice-product:hover {
+  cursor: pointer;
 }/*# sourceMappingURL=style.css.map */
