@@ -3,7 +3,7 @@ import pickle
 from abc import ABC, abstractmethod
 from typing import Dict, List, Type, Union, Generic, Optional, Any, Callable, Iterable
 
-from models import customer_model
+from models.customer_model import  customer
 from orm.set.postgres_manager import ConnectionConfig
 from orm.src.backbone_orm import PostgresManager
 from schema.SchemaParcel import ProductParcelSchema
@@ -52,7 +52,7 @@ class RepositoryCustomer(ABC, Generic[T, V]):
 
     @classmethod
     def model(cls) -> Type[T]:
-        return customer_model
+        return customer
 
     @classmethod
     def schema(cls) -> Type[ModelSchemaAbstract]:

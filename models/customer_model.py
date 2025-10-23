@@ -7,6 +7,9 @@ from models.model_abstract import ModelAbstract
 
 
 class customer(ModelAbstract):
+    def repository(self) -> Any:
+        from repository.Customer import RepositoryCustomer
+        return RepositoryCustomer
     id :int
     name : str
     last_name : str

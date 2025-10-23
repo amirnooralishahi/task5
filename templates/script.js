@@ -12,104 +12,215 @@ fetch('http://127.0.0.1:8000/parcel/vendor/list_product/')
     .then((res) => res.json())
     .then(products => {
         const form = document.getElementById('form-name')
-
         const container = document.getElementById('product_list_container');
-        container.innerHTML = '';
-        console.log(products);
+        var name_vendor = []
+        var last_name = []
+        var productLIst = document.getElementById('product_list')
+        let addParcel = {}
+
+        for (let i = 0; i < products.length; i++) {
+            let countProduct = 0
+            console.log(i);
+
+            var last_name_vendor = document.createElement('div')
+            var name = document.createElement('div')
+            let name_product = document.createElement('div')
+            let price_product = document.createElement('div')
+            var sortName = document.createElement('div')
+            var sortProduct = document.createElement('div')
+            var IconMin = document.createElement('div')
+            var IconPlus = document.createElement('div')
+            let count = document.createElement('div')
+            count.innerHTML = countProduct
+            IconPlus.innerHTML = '<i class="bi bi-plus"></i>'
+            IconMin.innerHTML = '<i class="bi bi-dash"></i>'
+            var nameVendorian = products[i].name_vendor
+
+            var lastNameVendorian = products[i].last_name_vendor
+            if ((name_vendor === 0 && last_name === 0) || ((name_vendor.indexOf(products[i].name)) && (last_name.indexOf(products[i].last_name_vendor)))) {
+                name_vendor.push(products[i].name_vendor)
+                last_name.push(products[i].last_name_vendor)
+                name.innerHTML = `${products[i].name_vendor}-${products[i].last_name_vendor} :نام غرفه دار `
+
+                sortName.appendChild(name)
+
+                name_product.innerHTML = products[i].name
+                price_product.innerHTML = products[i].price
+                sortProduct.appendChild(IconPlus)
+                IconMin.style.cursor = "pointer"
+                IconPlus.style.cursor = "pointer"
+                // addParcel['vendor'] = `${products[i].name_vendor}-${products[i].last_name_vendor}`
+
+                IconPlus.addEventListener('click', (event) => {
+                    event.preventDefault()
+
+                    countProduct = countProduct + 1
+                    count.innerHTML = countProduct
+                    addParcel[i] = {
+                        ['products']: {
+                            "nameVendor": products[i].name_vendor,
+                            "last_nameVendor": products[i].last_name_vendor,
+                            "nameProduct": products[i].name,
+                            "priceProduct": price_product.innerText,
+                            "count_product": countProduct,
+                        }
+                    };
 
 
+                })
+                sortProduct.appendChild(count)
+                sortProduct.appendChild(IconMin)
+                IconMin.addEventListener('click', async (event) => {
+                    event.preventDefault()
 
-        products.forEach(product => {
-            let currentCount = 1;
+                    if (countProduct != 0) {
+                        countProduct = countProduct - 1
+                        count.innerHTML = countProduct
+                        addParcel[i] = {
+                            ['products']: {
+                                "nameVendor": products[i].name_vendor,
+                                "last_nameVendor": products[i].last_name_vendor,
+                                "nameProduct": products[i].name,
+                                "priceProduct": price_product.innerText,
+                                "count_product": countProduct,
+                            }
+                        };
 
-            const productCard = document.createElement('div');
-            productCard.className = 'product_list_container d-flex flex-column gap-3';
 
-            productCard.innerHTML = `
-                <span class='d-flex gap-3'>${product.name} (قیمت: ${product.price})</span>
-                <p class='d-flex gap-2'> ${product.name_vendor} ${product.last_name_vendor} <strong>:نام فروشنده</strong></p>
-                
-                <div class='add-min d-flex flex-column gap-4' data-product-id="${product.id}">
-                    <div class='d-flex gap-3'>
-                    <div class='plus-btn'><i class="bi bi-plus-lg"></i></div>
-                    
-                    <span class='count-display'>${currentCount}</span> 
-                    
-                    <div class='min-btn'><i class="bi bi-dash-lg"></i></div>
-                    </div>
-                     <button class='but'>خرید جنس</button>
-                </div>
-                
-                <hr>
-            `;
+                    } else {
+                        count.innerHTML = 0
+                        addParcel[i] = {
+                            ['products']: {
+                                "nameVendor": products[i].name_vendor,
+                                "last_nameVendor": products[i].last_name_vendor,
+                                "nameProduct": products[i].name,
+                                "priceProduct": price_product.innerText,
+                                "count_product": countProduct,
+                            }
+                        };
 
-            container.appendChild(productCard);
-
-            const plusButton = productCard.querySelector('.plus-btn');
-            const minButton = productCard.querySelector('.min-btn');
-            const countDisplay = productCard.querySelector('.count-display');
-            const subbutton = productCard.querySelector('.but')
-            plusButton.addEventListener('click', () => {
-                currentCount++;
-                countDisplay.textContent = currentCount;
-                console.log(`Product ID ${product.id} count: ${currentCount}`);
-            });
-
-            minButton.addEventListener('click', () => {
-                if (currentCount > 1) { // جلوگیری از منفی شدن شمارنده
-                    currentCount--;
-                    countDisplay.textContent = currentCount;
-                    console.log(`Product ID ${product.id} count: ${currentCount}`);
-                }
-            });
-
-            const API_URL = 'http://127.0.0.1:8000/parcel/add_parcel/';
-            subbutton.addEventListener('click', async (event) => {
-                event.preventDefault()
-                var formData = new FormData(form)
-                var dicName = {}
-                for (var [key, value] of formData.entries()) {
-                    dicName[key] = value
-
-                }
-                const parcel = {
-                    'vendor_name': product.name_vendor,
-                    'last_name_vendor': product.last_name_vendor,
-
-                    'invoice': 1,
-                    'status': 'تایید',
-                    'count': currentCount,
-
-                    'product_id': product.name,
-                    'customer_name': dicName,
-                };
-
-                console.log("Sending Parcel Data:", parcel);
-
-                try {
-                    const response = await fetch(API_URL, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify(parcel),
-                    });
-                    if (!response.ok) {
-                        const errorData = await response.json();
-                        throw new Error(`Server Error ${response.status}: ${errorData.detail || 'Failed to process'}`);
                     }
 
-                    var data = await response.json();
-                    console.log("Success:", data);
-                    alert(`محصول ${product.name} با موفقیت ثبت شد.`);
-                } catch (error) {
-                    console.error("Fetch Error:", error);
-                    console.log(`خطا در ثبت خرید: ${error.message}`);
 
+                })
+
+                sortProduct.appendChild(price_product)
+                sortProduct.appendChild(name_product)
+                container.appendChild(sortName)
+                container.appendChild(sortProduct)
+
+                container.className = 'd-flex flex-column border border-black gap-2 col-12'
+                sortName.className = 'd-flex  gap-2 border border-black'
+                sortProduct.className = 'd-flex  gap-2  border border-black '
+                addParcel[i] = {
+                    ['products']: {
+                        "nameVendor": products[i].name_vendor,
+                        "last_nameVendor": products[i].last_name_vendor,
+                        "nameProduct": products[i].name,
+                        "priceProduct": price_product.innerText,
+                        "count_product": countProduct,
+                    }
+                };
+            } else {
+                name_product.innerHTML = products[i].name
+                price_product.innerHTML = products[i].price
+                container.appendChild(name_product)
+                container.appendChild(price_product)
+                sortProduct.appendChild(IconPlus)
+                sortProduct.appendChild(count)
+                sortProduct.appendChild(IconMin)
+                sortProduct.appendChild(price_product)
+                sortProduct.appendChild(name_product)
+                container.appendChild(sortProduct)
+                container.className = 'd-flex  gap-2 col-12'
+                sortProduct.className = 'd-flex  gap-2'
+                IconMin.style.cursor = "pointer"
+                IconPlus.style.cursor = "pointer"
+                IconPlus.addEventListener('click', (event) => {
+                    event.preventDefault()
+
+                    countProduct = countProduct + 1
+                    count.innerHTML = countProduct
+                    addParcel[i] = {
+                        ['products']: {
+                            "nameVendor": products[i].name_vendor,
+                            "last_nameVendor": products[i].last_name_vendor,
+                            "nameProduct": products[i].name,
+                            "priceProduct": price_product.innerText,
+                            "count_product": countProduct,
+                        }
+                    };
+                })
+
+                IconMin.addEventListener('click', async (event) => {
+                    event.preventDefault()
+                    if (countProduct != 0) {
+                        countProduct = countProduct - 1
+                        count.innerHTML = countProduct
+                        addParcel[i] = {
+                            ['products']: {
+                                "nameVendor": products[i].name_vendor,
+                                "last_nameVendor": products[i].last_name_vendor,
+                                "nameProduct": products[i].name,
+                                "priceProduct": price_product.innerText,
+                                "count_product": countProduct,
+                            }
+                        };
+
+                    } else {
+                        count.innerHTML = 0
+                        addParcel[i] = {
+                            ['products']: {
+                                "nameVendor": products[i].name_vendor,
+                                "last_nameVendor": products[i].last_name_vendor,
+                                "nameProduct": products[i].name,
+                                "priceProduct": price_product.innerText,
+                                "count_product": countProduct,
+                            }
+                        };
+
+                    }
+
+
+                })
+
+
+            }
+            addParcel[i] = {
+                ['products']: {
+                    "nameVendor": products[i].name_vendor,
+                    "last_nameVendor": products[i].last_name_vendor,
+                    "nameProduct": products[i].name,
+                    "priceProduct": price_product.innerText,
+                    "count_product": countProduct,
                 }
+            };
+
+        }
+        var parcelName = {}
+        var FormName = document.getElementById('form-name')
+        var sub = productLIst.querySelector('.confirmListProduct')
+        sub.addEventListener('click', async (event) => {
+            console.log(addParcel);
+
+            var formData = new FormData(FormName)
+            for (var [key, value] of formData.entries()) {
+                parcelName[key] = value
+            }
+            fetch(`http://127.0.0.1:8000/parcel/add_parcel/?name=${parcelName['name']}&last_name=${parcelName['last_name']}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    data: addParcel,
+                }),
+
+            }).then(res => { return res.json() }).then(data => {
+
             })
 
-        });
+        })
     });
 
 
@@ -170,7 +281,6 @@ submit_name_vendor.addEventListener('click', async (event) => {
     event.preventDefault()
     var formData = new FormData(formVendor)
     var infoVendor = {}
-    console.log(formData.values());
 
     for (var [key, value] of formData.entries()) {
         infoVendor[key] = value
@@ -180,7 +290,7 @@ submit_name_vendor.addEventListener('click', async (event) => {
     fetch(`http://127.0.0.1:8000/parcel/parcel-vendor/?name=${infoVendor['name']}&last_name=${infoVendor['last_name']}`).then(res => { return res.json() }).then(
         (data) => {
             let div_items = document.getElementById('show-parcel')
-            console.log(data);
+
             let save_id = []
 
             for (let i = 0; i < data.length; i++) {
@@ -232,10 +342,8 @@ submit_name_vendor.addEventListener('click', async (event) => {
                         show_id.style.border = "3px solid blue";
                     }
 
-                    // 🚩 تغییر ۳: فراخوانی تابع جدید برای به‌روزرسانی UI پایین صفحه
                     updateConfirmationArea();
 
-                    console.log("IDهای انتخاب شده:", selectedParcelIds);
                 });
             }
             let choice_product = document.getElementById('confrim-pro');
@@ -430,13 +538,13 @@ subcancle.addEventListener('click', async (event) => {
     for (var [key, value] of formData.entries()) {
         parcel[key] = value
     }
-    console.log(parcel);
-    
+
+
     var parcelName = {}
     for (var [key, value] of formName.entries()) {
         parcelName[key] = value
     }
-    
+
     fetch(`http://127.0.0.1:8000/parcel/cancel_invoice/?invoice_id=${parcel['invoice_id']}&name=${parcelName['name']}&last_name=${parcelName['last_name']}`)
         .then((res) => {
             const jsonPromise = res.json();
@@ -539,25 +647,23 @@ subName.addEventListener('click', async (event) => {
                     var form_vendor = document.getElementById('form_vendor_share')
                     var show_share = document.getElementById('show-share')
                     var submitShare = show_share.querySelector('.submitShare')
-                   
+
                     submitShare.addEventListener('click', async (event) => {
-                    var formDataShare = new FormData(form_vendor)
-                       
-                        var parcelshare = {}                    
-                          for (var [key, value] of formDataShare) {
-                        parcelshare[key] = value
-                        console.log(parcelshare);
-                        
-                          }
-                    
-                        event.preventDefault()                   
+                        var formDataShare = new FormData(form_vendor)
+
+                        var parcelshare = {}
+                        for (var [key, value] of formDataShare) {
+                            parcelshare[key] = value
+
+                        }
+
+                        event.preventDefault()
                         fetch(`http://127.0.0.1:8000/parcel/set_share/?vendor_id=${vendorId.innerText}&num=${parcelshare['vendorShare']}`).then(
                             res => { return res.json() }
                         ).then((data) => {
                             var share_vendor = document.getElementById('show-share-vendor')
                             share_vendor.innerHTML = data.message
-                            console.log(data);
-                            
+
                         })
 
 

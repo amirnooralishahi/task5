@@ -2,8 +2,8 @@ import datetime
 import decimal
 # from http.client import HTTPException
 from traceback import print_tb
-from typing import List
-
+from typing import List, Dict, Any
+from functools import reduce
 from fastapi import APIRouter,HTTPException
 
 from repository.Customer import RepositoryCustomer
@@ -185,80 +185,85 @@ async def get_parcel_for_vendor(name:str , last_name:str):
     return list_product
 
 @router.post('/add_parcel/')
-async def add_item_parcel(data:CreateParcelSchema):
-    query_origin_customer = RepositoryCustomer.select_where(RepositoryCustomer.field('name').eq(data.customer_name.get('name'))).where(RepositoryCustomer.field('last_name').eq(data.customer_name.get('last_name'))).select('*')
-    execute_customer = await RepositoryCustomer.execute_and_fetch(query_origin_customer)
-    if not execute_customer :
-        raise HTTPException(status_code=404,detail='customer is not exist')
+async def add_item_parcel(name:str,last_name:str,data:dict[str,dict[str,dict[str,Any]]]=CreateParcelSchema):
+    query_origin_customer = RepositoryCustomer.select_where(RepositoryCustomer.field('name').eq(name)).where(RepositoryCustomer.field('last_name').eq(last_name)).select('*')
+    share_company_parcel=0
+    for item in data.get('data'):
+        get_data = data.get('data').get(item).get('products')
+        execute_customer = await RepositoryCustomer.execute_and_fetch(query_origin_customer)
+        if not execute_customer :
+            raise HTTPException(status_code=404,detail='customer is not exist')
 
-    query_vendor =f'''
-    (select * from vendor where name='{data.vendor_name}' and last_name = '{data.last_name_vendor}') 
-    '''
-    execute_vendor = await RepositoryVendor.execute_and_fetch(query_vendor)
+        query_vendor =RepositoryVendor.select_where(RepositoryVendor.field('name').eq(get_data.get('nameVendor'))).where(RepositoryVendor.field('last_name').eq(get_data.get('last_nameVendor'))).select('*')
+        execute_vendor = await RepositoryVendor.execute_and_fetch(query_vendor)
+        if not execute_vendor:
+            raise HTTPException(status_code=404,detail='vendor is not exist')
 
-    if not execute_vendor:
-        raise HTTPException(status_code=404,detail='vendor is not exist')
+        value_invoice = {
+            'customer_id': execute_customer[0].get('id'),
+            'status': 'در انتظار ثبت خرید',
+            'origin': execute_customer[0].get('origin'),
+            'create_at': datetime.datetime.now(),
+            'update_at': datetime.datetime.now(),
+        }
+        existing_invoice_query = RepositoryInvoice.select_where(
+            RepositoryInvoice.field('customer_id').eq(value_invoice['customer_id'])
+        ).select('*')
+        existing_invoice = await RepositoryInvoice.execute_and_fetch(existing_invoice_query)
+        if not existing_invoice:
+            new_invoice = await RepositoryInvoice.create_return(value_invoice)
+            order = new_invoice.id
+        else:
+            order = existing_invoice[0].get('id')
+        query_product = RepositoryProduct.select_where(RepositoryProduct.field('name').eq(get_data.get('nameProduct'))).where(RepositoryProduct.field('vendor_id').eq(execute_vendor[0].get('id'))).select('*')
+        get_item=await RepositoryProduct.execute_and_fetch(query_product)
 
-    value_invoice = {
-        'customer_id': execute_customer[0].get('id'),
-        'status': 'در انتظار ثبت خرید',
-        'vendor_id': execute_vendor[0].get('id'),
-        'origin': execute_customer[0].get('origin'),
-        'create_at': datetime.datetime.now(),
-        'update_at': datetime.datetime.now(),
-    }
+        if not get_item :
+            raise HTTPException(status_code=404,detail='product is not exist')
+        price = (get_data.get('count_product')) * (get_item[0].get('price'))
+        vendor_id = execute_vendor[0].get('share')
+        share_company= []
 
-    existing_invoice_query = RepositoryInvoice.select_where(
-        RepositoryInvoice.field('customer_id').eq(value_invoice['customer_id'])
-    ).select('*')
-    existing_invoice = await RepositoryInvoice.execute_and_fetch(existing_invoice_query)
+        share_company.append( round((price * vendor_id) / 100))
+        share_company_parcelItem= int(round((price * vendor_id) / 100))
+        share_company_parcel=reduce(lambda x,y:x+y,share_company)
+        value_parcel = {
+            'vendor_id':execute_vendor[0].get('id'),
+            'customer_id': execute_customer[0].get('id'),
+            'price':price ,
+            'share_company':share_company_parcel,
+            'invoice_id':order,
+            'count': get_data.get('count_product'),
+            'status':'در انتظار ثبت خرید' ,
+            'origin':execute_customer[0].get('city'),
+            'delivery':'در انتظار تایید غرفه دار '
 
-    if not existing_invoice:
-        new_invoice = await RepositoryInvoice.create_return(value_invoice)
-        order = [new_invoice]
 
-    else:
-        order = existing_invoice
-    get_item = await RepositoryProduct.execute_and_fetch(
-        RepositoryProduct.select_where(RepositoryProduct.field('name').eq(data.product_id)).select('*'))
-    if not get_item :
-        raise HTTPException(status_code=404,detail='product is not exist')
-    price = (data.count) * (get_item[0].get('price'))
-    vendor_id = execute_vendor[0].get('share')
-    share_company = round((price * vendor_id) / 100)
+        }
+        query_parcel_vendor= RepositoryParcel.select_where(RepositoryParcel.field('vendor_id').eq(execute_vendor[0].get('id'))).where(RepositoryParcel.field(
+            'invoice_id').eq(order)).select('*')
+        execute_parcel_vendor=await RepositoryParcel.execute_and_fetch(query_parcel_vendor)
+        if  not execute_parcel_vendor:
+            parcel =await RepositoryParcel.create_return(value_parcel)
+            parcel_id = parcel.id
 
-    value_parcel = {
-        'vendor_id':execute_vendor[0].get('id'),
-        'customer_id': execute_customer[0].get('id'),
-        'price':price ,
-        'share_company':share_company,
-        'invoice_id':order[0].get('id'),
-        'count': data.count,
-        'status':'در انتظار ثبت خرید' ,
-        'origin':execute_customer[0].get('origin'),
+        else:
+            parcel =await RepositoryParcel.execute_and_fetch(RepositoryParcel.select_where(RepositoryParcel.field('invoice_id').eq(order)).select('*'))
+            parcel_id = parcel[0].get('id')
 
-    }
-    query_parcel= (RepositoryParcel.select_where(RepositoryParcel.field('invoice_id').eq(order[0].get('id'))).select('*'))
-    execute_parcel =await RepositoryParcel.execute_and_fetch(query_parcel)
 
-    if  not execute_parcel :
-        parcel =await RepositoryParcel.create_return(value_parcel)
-        parcel_id = parcel.id
-        print(parcel_id)
-    else:
-        parcel =await RepositoryParcel.execute_and_fetch(RepositoryParcel.select_where(RepositoryParcel.field('invoice_id').eq(order[0].get('id'))).select('*'))
-        parcel_id = parcel[0].get('id')
-    value_parcelItem = {
-        'parcel_id' : parcel_id,
-        'product_id':get_item[0].get('id'),
-        'count': data.count,
-        'price': price,
-        'share_company': share_company,
-    }
-    if not (await RepositoryItem.execute_and_fetch(RepositoryItem.select_where(RepositoryItem.field('parcel_id').eq(value_parcelItem['parcel_id'])).where(RepositoryItem.field('product_id').eq(data.product_id))) ):
-        parcelItem =await RepositoryItem.create_return(value_parcelItem)
+        value_parcelItem = {
+            'parcel_id' : parcel_id,
+            'product_id':get_item[0].get('id'),
+            'count':get_data.get('count_product'),
+            'price':price ,
+            'share_company': share_company_parcelItem,
+        }
+
+        if not (await RepositoryItem.execute_and_fetch(RepositoryItem.select_where(RepositoryItem.field('parcel_id').eq(value_parcelItem['parcel_id'])).where(RepositoryItem.field('product_id').eq(get_data.get('productName')))) ):
+            parcelItem =await RepositoryItem.create_return(value_parcelItem)
     return ShowInvoice(
-        id=order[0].get('id'),
+        id=order,
         customer_id=execute_customer[0].get('id'),
         status=value_invoice['status'],
         created_at=datetime.datetime.now(),
