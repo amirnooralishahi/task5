@@ -49,24 +49,17 @@ jobs:
         port: 22
 
         # دستوراتی که مستقیماً در سرور لینوکس اجرا می‌شوند
-        script: |
-          echo "Starting deployment for tag: ${{ github.ref_name }}"
+        echo "Starting deployment for tag: ${{ github.ref_name }}"
           
-          # 1. رفتن به مسیر پروژه در سرور
-          # 🚨 این مسیر را حتماً با مسیر واقعی پروژه در سرور جایگزین کنید 
-          PROJECT_DIR="/var/www/your-project-name" 
+          PROJECT_DIR="/home/amir/amirhossein/task5-develop/task5"
           cd $PROJECT_DIR
           
-          # 2. دریافت کدهای جدید (پول کردن تگ پوش‌شده)
-          # این دستور تغییرات را از گیت‌هاب به سرور لینوکس منتقل می‌کند.
           git fetch origin
           git checkout ${{ github.ref_name }}
           
-          # 3. نصب وابستگی‌های جدید (اگر در طول زمان تغییر کرده‌اند)
-          /usr/bin/python3 -m pip install -r requirements.txt
+      
+          $PROJECT_DIR/.venv/bin/python3 -m pip install -r requirements.txt
           
-          # 4. ری‌استارت سرویس FastAPI 
-          # 🚨 نام سرویس systemd یا supervisor خود را جایگزین کنید
-          sudo systemctl restart fastapi-parcel.service 
+          sudo systemctl restart my_fastapi_app.service
           
           echo "Deployment finished. Service restarted."

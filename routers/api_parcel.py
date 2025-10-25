@@ -347,3 +347,11 @@ async def list_vendor():
 
         vendor_list.append(show)
     return  vendor_list
+
+
+#hi my name is amirhossein
+
+
+@router.get('/list_vendor/')
+async def list_vendor_list():
+    pass
