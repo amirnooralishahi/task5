@@ -1,65 +1,30 @@
 name: Continuous Deployment on Tag
 
-# -----------------
-# 1. Trigger
-# -----------------
-# Workflow زمانی اجرا می‌شود که یک تگ جدید به سرور ریموت پوش شود.
-# این الگو تگ‌هایی مانند v1.0.0 یا v2.1.5 را شامل می‌شود.
 on:
   push:
     tags:
       - 'v*.*.*'
 
-# -----------------
-# 2. Jobs
-# -----------------
 jobs:
   deploy:
     runs-on: ubuntu-latest
-
     steps:
-
-    # الف) دانلود کد ریپوزیتوری روی محیط Runner گیت‌هاب
     - name: Checkout Code
       uses: actions/checkout@v4
-
-    # ب) تنظیم محیط Python
-    - name: Set up Python Environment
-      uses: actions/setup-python@v5
-      with:
-        # ورژن پایتون مورد استفاده در پروژه (باید با سرور سازگار باشد)
-        python-version: '3.11'
-
-    # ج) نصب وابستگی‌های پروژه (اختیاری، اما توصیه می‌شود)
-    # این مرحله می‌تواند برای اجرای تست‌ها هم مفید باشد، اما برای دپلوی SSH معمولا اختیاری است.
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt # اگر دارید
-
-    # د) اجرای دپلوی از طریق SSH
-    - name: Deploy to Linux Server via SSH
-      # استفاده از یک اکشن آماده برای اتصال SSH
+    - name: Deploy to Linux Server via SSH and Restart Service
       uses: appleboy/ssh-action@v1.0.3
       with:
-        # متغیرها از Secrets گیت‌هاب خوانده می‌شوند
         host: ${{ secrets.SSH_HOST }}
         username: ${{ secrets.SSH_USERNAME }}
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         port: 22
-
-        # دستوراتی که مستقیماً در سرور لینوکس اجرا می‌شوند
-        echo "Starting deployment for tag: ${{ github.ref_name }}"
-          
-          PROJECT_DIR="/home/amir/amirhossein/task5-develop/task5"
-          cd $PROJECT_DIR
-          
+        script: |
+          echo "Starting production deployment for tag: ${{ github.ref_name }}"
+          PROJECT_DIR="/home/amir/amirhossein/task5-production" 
+          cd $PROJECT_DIR || exit 1 
           git fetch origin
           git checkout ${{ github.ref_name }}
-          
-      
           $PROJECT_DIR/.venv/bin/python3 -m pip install -r requirements.txt
-          
-          sudo systemctl restart my_fastapi_app.service
-          
+          sudo systemctl restart task5-production.service           
+          sudo systemctl status task5-production.service
           echo "Deployment finished. Service restarted."

@@ -114,6 +114,9 @@
             <div class="row d-flex border border-black w-100" id="show-parcel">
 
             </div>
+            <div id="confrim-pro" class="row">
+
+            </div>
         </div>
     </div>
  
@@ -128,8 +131,8 @@
             </form>
             <form action="" id="cancle-form">
                 <label for="parcel_id">number_parcel</label>
-                <input type="number" name="parcel_id" id="cancel-parcel">
-                <button class="submit-cancel">click me </button>
+                <input type="number" name="parcel_id"  id="cancel-parcel-input">
+                <button class="submit-cancel-parcel">click me </button>
             </form>
             <div id="show_detail" class='d-flex  border border-black mt-3'></div>
         </div>
@@ -179,11 +182,26 @@
 
         </div>
     </div>
+    <div class="send-parcel">
+        <div class="send-parcel-container"> 
+            <form action="" id="sendParcel">
+                <label for="name">first_name</label>
+                <input type="text" name="name">
+                <label for="last_name">last_name</label>
+                <input type="text" name="last_name">
+                <button class="send-click">click me</button>
+            </form>
+            <div id="showSend" class="">
+
+            </div>
+        </div>
+    </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
         crossorigin="anonymous"></script>
 
 </body>
 <script src="script.js"></script>
+<script src="cancle.js"></script>
 
 </html>

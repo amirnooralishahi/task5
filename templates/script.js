@@ -20,7 +20,6 @@ fetch('http://127.0.0.1:8000/parcel/vendor/list_product/')
 
         for (let i = 0; i < products.length; i++) {
             let countProduct = 0
-            console.log(i);
 
             var last_name_vendor = document.createElement('div')
             var name = document.createElement('div')
@@ -324,7 +323,7 @@ submit_name_vendor.addEventListener('click', async (event) => {
                 div_items.appendChild(count)
                 show_id.style.cursor = "pointer"
                 const parcelIdToSelect = data[i].id;
-                let choice_product = document.getElementById('confrim-pro');
+
 
                 show_id.addEventListener('click', async (event) => {
                     event.preventDefault();
@@ -347,7 +346,7 @@ submit_name_vendor.addEventListener('click', async (event) => {
                 });
             }
             let choice_product = document.getElementById('confrim-pro');
-            if (choice_product.innerHTML === '') {
+            if (choice_product.innerHTML == '') {
 
                 let button_send_confrim = document.createElement('button');
                 let text_button = document.createTextNode('تایید سفارشات انتخاب شده');
@@ -451,135 +450,9 @@ function updateConfirmationArea() {
 }
 
 
-// cancel parcel
-var div = document.getElementById('cancel-parcel')
-var form_cancel = document.getElementById('cancle-form')
-var form_name = document.getElementById('get_name')
-var subcancle = div.querySelector('.submit-cancel')
-subcancle.addEventListener('click', async (event) => {
-    event.preventDefault()
-    var show_detail = document.getElementById('show_detail')
-
-    var formData = new FormData(form_cancel)
-    var formName = new FormData(form_name)
-    var parcel = {}
-    for (var [key, value] of formData.entries()) {
-        parcel[key] = value
-    }
-    var parcelName = {}
-    for (var [key, value] of formName.entries()) {
-        parcelName[key] = value
-    }
-    fetch(`http://127.0.0.1:8000/parcel/parcel/?parcel_id=${parcel['parcel_id']}&name=${parcelName['name']}&last_name=${parcelName['last_name']}`)
-        .then((res) => {
-            const jsonPromise = res.json();
-
-            if (res.status == 404) {
-                show_detail.innerHTML = 'همچین سفارشی یافت نشد'
-            } else if (res.status = 200) {
-                return jsonPromise;
-            }
 
 
-        })
-        .then(data => {
-            var divPrice = document.createElement('div')
-            divPrice.innerHTML = data.price
-            show_detail.appendChild(divPrice)
-            divPrice.className = 'd-flex flex-column border border-black p-2'
-            var divName = document.createElement('div')
-            divName.innerHTML = data.nameProduct
-            show_detail.appendChild(divName)
-            divName.className = 'd-flex flex-column border border-black p-2'
 
-            var divTotal = document.createElement('div')
-            divTotal.innerHTML = data.TotalPrice
-            show_detail.appendChild(divTotal)
-            divTotal.className = 'd-flex flex-column border border-black p-2'
-
-            var divCount = document.createElement('div')
-            divCount.innerHTML = data.count
-            show_detail.appendChild(divCount)
-            divCount.className = 'd-flex flex-column border border-black p-2'
-
-            var divStatus = document.createElement('div')
-            divStatus.innerHTML = data.status
-            show_detail.appendChild(divStatus)
-            divStatus.className = 'd-flex flex-column border border-black p-2'
-
-            var divOrigin = document.createElement('div')
-            divOrigin.innerHTML = data.origin
-            show_detail.appendChild(divOrigin)
-            divOrigin.className = 'd-flex flex-column border border-black p-2'
-
-
-        })
-        .catch(error => {
-            // خطاها (چه Network و چه خطای 500) در اینجا مدیریت می‌شوند
-            console.error('Fetch Error:', error.message);
-        });
-
-})
-
-
-//cancel invoice 
-
-var div = document.getElementById('cancel-invoice')
-var form_cancel = document.getElementById('cancle-form_invoice')
-var form_name = document.getElementById('get_name_invoice')
-var subcancle = div.querySelector('.submit-cancel')
-subcancle.addEventListener('click', async (event) => {
-    event.preventDefault()
-    var show_detail = document.getElementById('show_detail_invoice')
-
-    var formData = new FormData(form_cancel)
-    var formName = new FormData(form_name)
-    var parcel = {}
-    for (var [key, value] of formData.entries()) {
-        parcel[key] = value
-    }
-
-
-    var parcelName = {}
-    for (var [key, value] of formName.entries()) {
-        parcelName[key] = value
-    }
-
-    fetch(`http://127.0.0.1:8000/parcel/cancel_invoice/?invoice_id=${parcel['invoice_id']}&name=${parcelName['name']}&last_name=${parcelName['last_name']}`)
-        .then((res) => {
-            const jsonPromise = res.json();
-
-            if (res.status == 404) {
-                show_detail.innerHTML = 'همچین سفارشی یافت نشد'
-            } else if (res.status = 200) {
-                return jsonPromise;
-            }
-
-
-        })
-        .then(data => {
-
-            var divCustomerName = document.createElement('div')
-            divCustomerName.innerHTML = data.customer_name
-            show_detail.appendChild(divCustomerName)
-            divCustomerName.className = 'd-flex flex-column border border-black p-2'
-
-            var divInvoiceId = document.createElement('div')
-            divInvoiceId.innerHTML = data.invoice_id
-            show_detail.appendChild(divInvoiceId)
-            divInvoiceId.className = 'd-flex flex-column border border-black p-2'
-
-            var divStatus = document.createElement('div')
-            divStatus.innerHTML = data.status
-            show_detail.appendChild(divStatus)
-            divStatus.className = 'd-flex flex-column border border-black p-2'
-        })
-        .catch(error => {
-            // خطاها (چه Network و چه خطای 500) در اینجا مدیریت می‌شوند
-            console.error('Fetch Error:', error.message);
-        });
-
-})
 
 
 var vendorname = document.getElementById('show-vendor')
@@ -676,3 +549,103 @@ subName.addEventListener('click', async (event) => {
     )
 })
 //مشخص کردن سهم غرفه دار ها 
+
+
+
+//ارسال مرسوله توسط غرفه دار 
+
+let formSend = document.getElementById('sendParcel')
+let butClick = formSend.querySelector('.send-click')
+let parcelSend = {}
+butClick.addEventListener('click', async (event) => {
+    event.preventDefault()
+    let formData = new FormData(formSend)
+    for (var [key, value] of formData.entries()) {
+        parcelSend[key] = value
+    }
+    fetch(`http://127.0.0.1:8000/parcel/parcel-vendor/?name=${parcelSend['name']}&last_name=${parcelSend['last_name']}`).then(async res => {
+        console.log(res.json);
+        if (res.status == 404) {
+            var json = await res.json()
+            const error = json.detail
+            if (error == 'vendor is not exist') {
+                var notName = document.getElementById('showSend')
+                notName.innerHTML = error
+            }
+        }
+        return res.json()
+
+    }).then((data) => {
+        var showParcel= document.getElementById('showSend')
+        for (var i = 0; i < data.length; i++) {
+            if (data[i].status == 'تایید شده توسط غرفه دار') {
+                let nameProduct = data[i].nameProduct
+                let divNameProduct = document.createElement('div')
+                divNameProduct.innerHTML = nameProduct
+
+                let priceProduct = data[i].price
+                let divPrice = document.createElement('div')
+                divPrice.innerHTML = priceProduct
+
+                let totalPriceProduct = data[i].TotalPrice
+                let divTotal = document.createElement('div')
+                divTotal.innerHTML = totalPriceProduct
+
+                let countProduct = data[i].count
+                let divCountProduct = document.createElement('div')
+                divCountProduct.innerHTML = countProduct
+
+                let statusProduct = data[i].status
+                let divStatus = document.createElement('div')
+                divStatus.innerHTML = statusProduct
+                let Button =document.createElement('button')
+                Button.innerText='click me'
+
+                Button.style.height='50px' 
+                var showSend = document.createElement('div')
+                showSend.appendChild(divNameProduct)
+                showSend.appendChild(divPrice)
+                showSend.appendChild(divCountProduct)
+                showSend.appendChild(divTotal)
+                showSend.appendChild(divStatus)
+                showSend.appendChild(Button)
+                showSend.className = ' d-flex col-3 flex-column gap-2 border border border-black '
+                showParcel.className='row d-flex p-2'
+                showParcel.appendChild(showSend)
+                Button.addEventListener('click',async (event)=> { 
+                    fetch(`http://127.0.0.1:8000/parcel/post_vendor/?name=${parcelSend['name']}&last_name=${parcelSend['last_name']}`).then(res=>{ 
+                        return res.json()
+                    }).then(
+                        data=>{ 
+                            showParcel.innerHTML=''
+                            var showSend = document.createElement('div')
+                            let getStatus = data.statusDelivery 
+                            let status = document.createElement('div')
+                            status.innerHTML=getStatus
+                            let name = document.createElement('div')
+                            let getName = data.name_customer 
+                            name.innerHTML = getName 
+                            let lastName = document.createElement('div')
+                            let getLast = data.lastName_customer 
+                            lastName.innerHTML = getLast 
+                            let id = document.createElement('div')
+                            let getId =data.parcel_id
+                            id.innerHTML = getId 
+                            let price = document.createElement('div')
+                            let getPrice = data.price_delivery 
+                            price.innerHTML = getPrice
+                            showSend.appendChild(name)
+                            showSend.appendChild(lastName)
+                            showSend.appendChild(id)
+                            showSend.appendChild(price)
+                            showSend.className= ' d-flex flex-column '
+                            showParcel.appendChild(showSend)
+                        }
+                    )
+                })
+
+            }
+        }
+    })
+
+})

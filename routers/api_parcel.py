@@ -4,7 +4,7 @@ import decimal
 from traceback import print_tb
 from typing import List, Dict, Any
 from functools import reduce
-from fastapi import APIRouter,HTTPException
+from fastapi import APIRouter,HTTPException,status
 
 from repository.Customer import RepositoryCustomer
 from repository.Invoice import RepositoryInvoice
@@ -14,6 +14,7 @@ from repository.parcelItem import RepositoryItem
 from repository.product import RepositoryProduct
 from schema.SchemShowProduct import ShowProductSchema
 from schema.SchemaParcel import CreateParcelSchema
+from schema.SchemaSendPostVendor import ShowPostVendor
 from schema.SchemaShowInvoice import ShowInvoice
 from schema.SchemaShowParcel import ShowParcel, ShowCancelParcel, ShowCancelInvoice
 from schema.SchemaVendor import ShowVendorSchema
@@ -150,7 +151,7 @@ async def cancel_one_parcel(parcel_id: int,name:str , last_name:str):
         sender=sender
     )
 @router.get('/parcel-vendor/')
-async def get_parcel_for_vendor(name:str , last_name:str):
+async def get_parcelItem_for_vendor(name:str , last_name:str):
     query_vendor=RepositoryVendor.select_where(RepositoryVendor.field('name').eq(name)).where(RepositoryVendor.field('last_name').eq(last_name)).select('*')
     execute= await RepositoryVendor.execute_and_fetch(query_vendor)
     # تعداد کل محصولات یک سفارش و اسم سفارش قیمت کل سفارش مقصد هر سفارش
@@ -188,6 +189,8 @@ async def get_parcel_for_vendor(name:str , last_name:str):
 async def add_item_parcel(name:str,last_name:str,data:dict[str,dict[str,dict[str,Any]]]=CreateParcelSchema):
     query_origin_customer = RepositoryCustomer.select_where(RepositoryCustomer.field('name').eq(name)).where(RepositoryCustomer.field('last_name').eq(last_name)).select('*')
     share_company_parcel=0
+    share_company = {}
+
     for item in data.get('data'):
         get_data = data.get('data').get(item).get('products')
         execute_customer = await RepositoryCustomer.execute_and_fetch(query_origin_customer)
@@ -217,29 +220,25 @@ async def add_item_parcel(name:str,last_name:str,data:dict[str,dict[str,dict[str
             order = existing_invoice[0].get('id')
         query_product = RepositoryProduct.select_where(RepositoryProduct.field('name').eq(get_data.get('nameProduct'))).where(RepositoryProduct.field('vendor_id').eq(execute_vendor[0].get('id'))).select('*')
         get_item=await RepositoryProduct.execute_and_fetch(query_product)
-
         if not get_item :
             raise HTTPException(status_code=404,detail='product is not exist')
         price = (get_data.get('count_product')) * (get_item[0].get('price'))
-        vendor_id = execute_vendor[0].get('share')
-        share_company= []
+        vendor_id_share = execute_vendor[0].get('share')
+        share_company[execute_vendor[0].get('id')] =int(round((price * vendor_id_share)))
 
-        share_company.append( round((price * vendor_id) / 100))
-        share_company_parcelItem= int(round((price * vendor_id) / 100))
-        share_company_parcel=reduce(lambda x,y:x+y,share_company)
+        share_company_parcelItem= int(round((price * vendor_id_share)))
         value_parcel = {
             'vendor_id':execute_vendor[0].get('id'),
             'customer_id': execute_customer[0].get('id'),
             'price':price ,
-            'share_company':share_company_parcel,
+            'share_company':share_company[execute_vendor[0].get('id')],
             'invoice_id':order,
             'count': get_data.get('count_product'),
             'status':'در انتظار ثبت خرید' ,
             'origin':execute_customer[0].get('city'),
             'delivery':'در انتظار تایید غرفه دار '
-
-
         }
+        print(value_parcel)
         query_parcel_vendor= RepositoryParcel.select_where(RepositoryParcel.field('vendor_id').eq(execute_vendor[0].get('id'))).where(RepositoryParcel.field(
             'invoice_id').eq(order)).select('*')
         execute_parcel_vendor=await RepositoryParcel.execute_and_fetch(query_parcel_vendor)
@@ -349,9 +348,55 @@ async def list_vendor():
     return  vendor_list
 
 
-#hi my name is amirhossein
+@router.get('/post_vendor/')
+async def post_parcel_vendor(name:str,last_name:str):
+    query_vendor = RepositoryVendor.select_where(RepositoryVendor.field('name').eq(name)).where(RepositoryVendor.field('last_name').eq(last_name)).select('*')
+    execute =await RepositoryVendor.execute_and_fetch(query_vendor)
+    costDelivery= []
+    constFinally = 0
+    # print(execute)
+    if not execute :
+        raise HTTPException(status_code=404,detail='vendor is not exist')
+    query_parcel = RepositoryParcel.select_where(RepositoryParcel.field('vendor_id').eq(execute[0].get('id'))).select('*')
+    execute_parcel = await RepositoryParcel.execute_and_fetch(query_parcel)
+
+    if execute_parcel[0].get('status')== 'تایید شده توسط غرفه دار' :
+        if not execute_parcel :
+            raise HTTPException(status_code=404,detail='parcel is not exist')
+        update =await RepositoryParcel.update_by_id(execute_parcel[0].get('id'),{'delivery':'مرسوله توسط غرفه دار ارسال شد ','pricedelivery':30000})
+
+        query_invoice = RepositoryInvoice.select_where(RepositoryInvoice.field('id').eq(execute_parcel[0].get('invoice_id'))).select('*')
+        execute_invoice = await RepositoryInvoice.execute_and_fetch(query_invoice)
+
+        if not execute_invoice :
+            raise HTTPException(status_code=404,detail='invoice is not exist')
+        get_all_parcel = RepositoryParcel.select_where(RepositoryParcel.field('invoice_id').eq(execute_parcel[0].get('invoice_id'))).select('*')
+        execute_parcel_all = await RepositoryParcel.execute_and_fetch(get_all_parcel)
+        # print(execute_parcel_all)
+        for index,value in enumerate(execute_parcel_all) :
 
 
-@router.get('/list_vendor/')
-async def list_vendor_list():
-    pass
+            if value.get('pricedelivery') is not None :
+                deliveryCost= value.get('pricedelivery')
+                costDelivery.append(deliveryCost)
+                for index,cost in enumerate(costDelivery):
+                        constFinally +=cost
+                print(value.get('status') == 'تایید شده توسط غرفه دار')
+                print(value.get('delivery')=='مرسوله توسط غرفه دار ارسال شد ' )
+                if value.get('delivery')=='مرسوله توسط غرفه دار ارسال شد ' and value.get('status') == 'تایید شده توسط غرفه دار' :
+                    update_invoice =await RepositoryInvoice.update_by_id(execute_invoice[0].get('id'),{'status':'تایید شده توسط غرفه دار' ,'delivery':'ارسال شده توسط تمامی غرفه دار ها ','pricedelivery':constFinally})
+                    query_customer = RepositoryCustomer.select_where(RepositoryCustomer.field('id').eq(execute_parcel[0].get('customer_id'))).select('*')
+                    execute_customer = await RepositoryCustomer.execute_and_fetch(query_customer)
+                    query_vendor = RepositoryVendor.select_where(RepositoryVendor.field('id').eq(value.get('vendor_id'))).select('*')
+                    execute_vendor = await RepositoryVendor.execute_and_fetch(query_vendor)
+
+                else :
+                        raise HTTPException(status_code=status.HTTP_406_NOT_ACCEPTABLE,detail='سفارش شما هنوز به تایید غرفه دار نرسیده است ')
+        print(execute_parcel[0])
+        return ShowPostVendor(
+                price_delivery=value.get('pricedelivery'),
+                parcel_id=execute_parcel[0].get('id'),
+                name_customer=execute_customer[0].get('name'),
+                lastName_customer=execute_customer[0].get('last_name'),
+                statusDelivery=value.get('status')
+            )
