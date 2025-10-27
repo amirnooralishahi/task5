@@ -758,3 +758,11 @@ class RepositoryVendor(ABC, Generic[T, V]):
     def forget_relation_cache(cls, model: T, relation_name: str) -> None:
         relation: Relation = getattr(cls, relation_name + "_relation")()
         relation.forget(model, relation_name)
+
+    @classmethod
+    def get_vendor(cls ,name, last_name ):
+
+        query = cls.select_where(cls.field('name').eq(name))
+        query = query.where(cls.field('last_name').eq(last_name))
+        query = query.select(cls.table().star)
+        return cls.first(query=query)

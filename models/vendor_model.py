@@ -18,7 +18,7 @@ class vendor(ModelAbstract):
     balance: Optional[int]
     national_code: Optional[int]
     city: Optional[str]
-
+    share:Optional[Decimal]
     def parcel_relation(self):
         from repository.Vendor import RepositoryVendor
         from repository.parcelRepo import RepositoryParcel

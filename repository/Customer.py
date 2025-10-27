@@ -758,3 +758,14 @@ class RepositoryCustomer(ABC, Generic[T, V]):
     def forget_relation_cache(cls, model: T, relation_name: str) -> None:
         relation: Relation = getattr(cls, relation_name + "_relation")()
         relation.forget(model, relation_name)
+
+    @classmethod
+    def get_customer(cls ,name, last_name ):
+        params = Parameters()
+        query = cls.select_query()
+        query = query.where(cls.field('name').eq(params.make(name)))
+        query = query.where(cls.field('last_name').eq(params.make(last_name)))
+        query = query.select(cls.table().star)
+
+        return cls.first(query=query, params=params)
+

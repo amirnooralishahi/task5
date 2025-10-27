@@ -9,8 +9,12 @@ let selectedParcelIds = [];
 
 // show all product 
 fetch('http://127.0.0.1:8000/parcel/vendor/list_product/')
-    .then((res) => res.json())
+    .then((res) => {
+        
+        return res.json()})
     .then(products => {
+       
+        
         const form = document.getElementById('form-name')
         const container = document.getElementById('product_list_container');
         var name_vendor = []
@@ -20,7 +24,7 @@ fetch('http://127.0.0.1:8000/parcel/vendor/list_product/')
 
         for (let i = 0; i < products.length; i++) {
             let countProduct = 0
-
+             console.log(products[i].name_vendor);
             var last_name_vendor = document.createElement('div')
             var name = document.createElement('div')
             let name_product = document.createElement('div')

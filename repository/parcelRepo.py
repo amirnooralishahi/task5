@@ -768,3 +768,23 @@ class RepositoryParcel(ABC, Generic[T, V]):
     @classmethod
     def parcel_items_relation(cls):
         return  cls.belongs_to(RepositoryInvoice)
+
+
+
+
+    @classmethod
+    def get_parcel(
+            cls,
+            parcel_id: int=None,
+            invoice_id: int = None,
+    ):
+        params = Parameters()
+        query = cls.select_query()
+        if invoice_id :
+            query = query.where(cls.field('invoice_id').eq(params.make(invoice_id)))
+        if parcel_id :
+            query = query.where(cls.field('id').eq(params.make(parcel_id)))
+
+        query = query.select(cls.table().star)
+
+        return cls.first(query=query, params=params)
