@@ -32,7 +32,7 @@ async def startup_event():
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    print("Connecting to database and creating tables...")
+
     await create_db_and_tables()
     yield
 
@@ -42,10 +42,7 @@ app.add_event_handler("startup", startup_event)
 app.include_router(router)
 origins = [
     # مبداهای مجاز
-    "http://127.0.0.1:5500",
-    "http://localhost:5500",
-    "http://localhost:8080",
-    'http://localhost:*'
+    '*'
 ]
 
 app.add_middleware(
@@ -61,7 +58,6 @@ async def add_process_time_header(request: Request, call_next):
     response = await  call_next(request)
     process_time = time.perf_counter() - start_time
     response.headers["X-Process-Time"] = str(process_time)
-    print(response.headers)
     return response
 if __name__ == "__main__":
     uvicorn.run('config:app',host='0.0.0.0',port=8000,reload=True)

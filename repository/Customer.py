@@ -762,10 +762,10 @@ class RepositoryCustomer(ABC, Generic[T, V]):
     @classmethod
     def get_customer(cls ,name, last_name ):
         params = Parameters()
-        query = cls.select_query()
-        query = query.where(cls.field('name').eq(params.make(name)))
-        query = query.where(cls.field('last_name').eq(params.make(last_name)))
-        query = query.select(cls.table().star)
 
-        return cls.first(query=query, params=params)
+        query = cls.select_where(cls.field('name').eq(name))
+        query = query.where(cls.field('last_name').eq(last_name))
+        query = query.select('*')
+
+        return  cls.first(query=query)
 

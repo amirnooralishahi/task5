@@ -755,3 +755,22 @@ class RepositoryInvoice(ABC, Generic[T, V]):
     def forget_relation_cache(cls, model: T, relation_name: str) -> None:
         relation: Relation = getattr(cls, relation_name + "_relation")()
         relation.forget(model, relation_name)
+
+
+    @classmethod
+    def get_invoice(cls,
+                    customer_id:int = None,
+                    invoice_id : int = None
+                    ):
+
+        params = Parameters()
+        query = cls.select_query()
+        if customer_id :
+            query = query.where(cls.field('customer_id').eq((customer_id)))
+
+        if invoice_id :
+            query= query.where(cls.field('id').eq((invoice_id)))
+
+        query = query.select(cls.table().star)
+
+        return  cls.get(query=query)

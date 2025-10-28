@@ -760,9 +760,17 @@ class RepositoryVendor(ABC, Generic[T, V]):
         relation.forget(model, relation_name)
 
     @classmethod
-    def get_vendor(cls ,name, last_name ):
+    async def get_vendor(cls ,name, last_name ):
+        query=cls.select_query()
+        query = query.where(cls.field('name').isin(name))
+        query = query.where(cls.field('last_name').isin(last_name))
+        query = query.select('*')
 
-        query = cls.select_where(cls.field('name').eq(name))
-        query = query.where(cls.field('last_name').eq(last_name))
-        query = query.select(cls.table().star)
-        return cls.first(query=query)
+        return await cls.get(query=query)
+    @classmethod
+    async def find_by_many_id (cls,id:List[int])->Any:
+        query=cls.select_query()
+        query = query.where(cls.field('id').isin(id))
+        query = query.select('*')
+        vendor=await cls.get(query=query)
+        return None if len(vendor) == 0 else vendor

@@ -753,3 +753,10 @@ class RepositoryProduct(ABC, Generic[T, V]):
     def forget_relation_cache(cls, model: T, relation_name: str) -> None:
         relation: Relation = getattr(cls, relation_name + "_relation")()
         relation.forget(model, relation_name)
+
+    @classmethod
+    async def get_product_many(cls,name:List[str]):
+        query=cls.select_query()
+        query= query.where(cls.field('name').isin(name))
+        query = query.select('*')
+        return await cls.get(query)

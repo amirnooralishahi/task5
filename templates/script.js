@@ -10,221 +10,178 @@ let selectedParcelIds = [];
 // show all product 
 fetch('http://127.0.0.1:8000/parcel/vendor/list_product/')
     .then((res) => {
+        console.log(res);
         
-        return res.json()})
-    .then(products => {
-       
+        return res.json()
+    })
+.then(products => {
+
+    console.log(products);
+    
+    const form = document.getElementById('form-name')
+    const container = document.getElementById('product_list_container');
+    var name_vendor = []
+    var last_name = []
+    var productLIst = document.getElementById('product_list')
+    let addParcel = {}
+
+    for (let i = 0; i < products.length; i++) {
+        let countProduct = 0
         
-        const form = document.getElementById('form-name')
-        const container = document.getElementById('product_list_container');
-        var name_vendor = []
-        var last_name = []
-        var productLIst = document.getElementById('product_list')
-        let addParcel = {}
+        var last_name_vendor = document.createElement('div')
+        var name = document.createElement('div')
+        let name_product = document.createElement('div')
+        let price_product = document.createElement('div')
+        var sortName = document.createElement('div')
+        var sortProduct = document.createElement('div')
+        var IconMin = document.createElement('div')
+        var IconPlus = document.createElement('div')
+        let count = document.createElement('div')
+        count.innerHTML = countProduct
+        IconPlus.innerHTML = '<i class="bi bi-plus"></i>'
+        IconMin.innerHTML = '<i class="bi bi-dash"></i>'
+        
+        const nameVendorian = products[i].name_vendor + '-' + products[i].last_name_vendor;
+        
+        const newProduct = {
+            product_name: products[i].name,
+            price: products[i].price,
+            count: 0
+        };
 
-        for (let i = 0; i < products.length; i++) {
-            let countProduct = 0
-             console.log(products[i].name_vendor);
-            var last_name_vendor = document.createElement('div')
-            var name = document.createElement('div')
-            let name_product = document.createElement('div')
-            let price_product = document.createElement('div')
-            var sortName = document.createElement('div')
-            var sortProduct = document.createElement('div')
-            var IconMin = document.createElement('div')
-            var IconPlus = document.createElement('div')
-            let count = document.createElement('div')
-            count.innerHTML = countProduct
-            IconPlus.innerHTML = '<i class="bi bi-plus"></i>'
-            IconMin.innerHTML = '<i class="bi bi-dash"></i>'
-            var nameVendorian = products[i].name_vendor
-
-            var lastNameVendorian = products[i].last_name_vendor
-            if ((name_vendor === 0 && last_name === 0) || ((name_vendor.indexOf(products[i].name)) && (last_name.indexOf(products[i].last_name_vendor)))) {
-                name_vendor.push(products[i].name_vendor)
-                last_name.push(products[i].last_name_vendor)
-                name.innerHTML = `${products[i].name_vendor}-${products[i].last_name_vendor} :نام غرفه دار `
-
-                sortName.appendChild(name)
-
-                name_product.innerHTML = products[i].name
-                price_product.innerHTML = products[i].price
-                sortProduct.appendChild(IconPlus)
-                IconMin.style.cursor = "pointer"
-                IconPlus.style.cursor = "pointer"
-                // addParcel['vendor'] = `${products[i].name_vendor}-${products[i].last_name_vendor}`
-
-                IconPlus.addEventListener('click', (event) => {
-                    event.preventDefault()
-
-                    countProduct = countProduct + 1
-                    count.innerHTML = countProduct
-                    addParcel[i] = {
-                        ['products']: {
-                            "nameVendor": products[i].name_vendor,
-                            "last_nameVendor": products[i].last_name_vendor,
-                            "nameProduct": products[i].name,
-                            "priceProduct": price_product.innerText,
-                            "count_product": countProduct,
-                        }
-                    };
-
-
-                })
-                sortProduct.appendChild(count)
-                sortProduct.appendChild(IconMin)
-                IconMin.addEventListener('click', async (event) => {
-                    event.preventDefault()
-
-                    if (countProduct != 0) {
-                        countProduct = countProduct - 1
-                        count.innerHTML = countProduct
-                        addParcel[i] = {
-                            ['products']: {
-                                "nameVendor": products[i].name_vendor,
-                                "last_nameVendor": products[i].last_name_vendor,
-                                "nameProduct": products[i].name,
-                                "priceProduct": price_product.innerText,
-                                "count_product": countProduct,
-                            }
-                        };
-
-
-                    } else {
-                        count.innerHTML = 0
-                        addParcel[i] = {
-                            ['products']: {
-                                "nameVendor": products[i].name_vendor,
-                                "last_nameVendor": products[i].last_name_vendor,
-                                "nameProduct": products[i].name,
-                                "priceProduct": price_product.innerText,
-                                "count_product": countProduct,
-                            }
-                        };
-
-                    }
-
-
-                })
-
-                sortProduct.appendChild(price_product)
-                sortProduct.appendChild(name_product)
-                container.appendChild(sortName)
-                container.appendChild(sortProduct)
-
-                container.className = 'd-flex flex-column border border-black gap-2 col-12'
-                sortName.className = 'd-flex  gap-2 border border-black'
-                sortProduct.className = 'd-flex  gap-2  border border-black '
-                addParcel[i] = {
-                    ['products']: {
-                        "nameVendor": products[i].name_vendor,
-                        "last_nameVendor": products[i].last_name_vendor,
-                        "nameProduct": products[i].name,
-                        "priceProduct": price_product.innerText,
-                        "count_product": countProduct,
-                    }
-                };
-            } else {
-                name_product.innerHTML = products[i].name
-                price_product.innerHTML = products[i].price
-                container.appendChild(name_product)
-                container.appendChild(price_product)
-                sortProduct.appendChild(IconPlus)
-                sortProduct.appendChild(count)
-                sortProduct.appendChild(IconMin)
-                sortProduct.appendChild(price_product)
-                sortProduct.appendChild(name_product)
-                container.appendChild(sortProduct)
-                container.className = 'd-flex  gap-2 col-12'
-                sortProduct.className = 'd-flex  gap-2'
-                IconMin.style.cursor = "pointer"
-                IconPlus.style.cursor = "pointer"
-                IconPlus.addEventListener('click', (event) => {
-                    event.preventDefault()
-
-                    countProduct = countProduct + 1
-                    count.innerHTML = countProduct
-                    addParcel[i] = {
-                        ['products']: {
-                            "nameVendor": products[i].name_vendor,
-                            "last_nameVendor": products[i].last_name_vendor,
-                            "nameProduct": products[i].name,
-                            "priceProduct": price_product.innerText,
-                            "count_product": countProduct,
-                        }
-                    };
-                })
-
-                IconMin.addEventListener('click', async (event) => {
-                    event.preventDefault()
-                    if (countProduct != 0) {
-                        countProduct = countProduct - 1
-                        count.innerHTML = countProduct
-                        addParcel[i] = {
-                            ['products']: {
-                                "nameVendor": products[i].name_vendor,
-                                "last_nameVendor": products[i].last_name_vendor,
-                                "nameProduct": products[i].name,
-                                "priceProduct": price_product.innerText,
-                                "count_product": countProduct,
-                            }
-                        };
-
-                    } else {
-                        count.innerHTML = 0
-                        addParcel[i] = {
-                            ['products']: {
-                                "nameVendor": products[i].name_vendor,
-                                "last_nameVendor": products[i].last_name_vendor,
-                                "nameProduct": products[i].name,
-                                "priceProduct": price_product.innerText,
-                                "count_product": countProduct,
-                            }
-                        };
-
-                    }
-
-
-                })
-
-
-            }
-            addParcel[i] = {
-                ['products']: {
-                    "nameVendor": products[i].name_vendor,
-                    "last_nameVendor": products[i].last_name_vendor,
-                    "nameProduct": products[i].name,
-                    "priceProduct": price_product.innerText,
-                    "count_product": countProduct,
-                }
-            };
-
+        // 🎯 ثبت اولیه محصول و مرجع‌دهی (فقط یک بار)
+        if (!addParcel[nameVendorian]) {
+            addParcel[nameVendorian] = [];
         }
-        var parcelName = {}
-        var FormName = document.getElementById('form-name')
-        var sub = productLIst.querySelector('.confirmListProduct')
-        sub.addEventListener('click', async (event) => {
-            console.log(addParcel);
+        addParcel[nameVendorian].push(newProduct);
+        const productReference = newProduct;
 
-            var formData = new FormData(FormName)
-            for (var [key, value] of formData.entries()) {
-                parcelName[key] = value
-            }
-            fetch(`http://127.0.0.1:8000/parcel/add_parcel/?name=${parcelName['name']}&last_name=${parcelName['last_name']}`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    data: addParcel,
-                }),
+        var lastNameVendorian = products[i].last_name_vendor
+        
+        if ((name_vendor === 0 && last_name === 0) || ((name_vendor.indexOf(products[i].name)) && (last_name.indexOf(products[i].last_name_vendor)))) {
+            name_vendor.push(products[i].name_vendor)
+            last_name.push(products[i].last_name_vendor)
+            name.innerHTML = `${products[i].name_vendor}-${products[i].last_name_vendor} :نام غرفه دار `
 
-            }).then(res => { return res.json() }).then(data => {
+            sortName.appendChild(name)
+
+            name_product.innerHTML = products[i].name
+            price_product.innerHTML = products[i].price
+            sortProduct.appendChild(IconPlus)
+            IconMin.style.cursor = "pointer"
+            IconPlus.style.cursor = "pointer"
+
+            IconPlus.addEventListener('click', (event) => {
+                event.preventDefault()
+
+                countProduct = countProduct + 1
+                count.innerHTML = countProduct
+                
+                // به‌روزرسانی مرجع count
+                productReference.count = countProduct; 
 
             })
+            sortProduct.appendChild(count)
+            sortProduct.appendChild(IconMin)
+            IconMin.addEventListener('click', async (event) => {
+                event.preventDefault()
 
+                if (countProduct != 0) {
+                    countProduct = countProduct - 1
+                    count.innerHTML = countProduct
+                    
+                    // به‌روزرسانی مرجع count
+                    productReference.count = countProduct; 
+
+                } else {
+                    count.innerHTML = 0
+                    
+                    // به‌روزرسانی مرجع count به صفر
+                    productReference.count = 0; 
+                }
+            })
+
+            sortProduct.appendChild(price_product)
+            sortProduct.appendChild(name_product)
+            container.appendChild(sortName)
+            container.appendChild(sortProduct)
+
+            container.className = 'd-flex flex-column border border-black gap-2 col-12'
+            sortName.className = 'd-flex gap-2 border border-black'
+            sortProduct.className = 'd-flex gap-2 border border-black '
+        } else {
+            name_product.innerHTML = products[i].name
+            price_product.innerHTML = products[i].price
+            container.appendChild(name_product)
+            container.appendChild(price_product)
+            sortProduct.appendChild(IconPlus)
+            sortProduct.appendChild(count)
+            sortProduct.appendChild(IconMin)
+            sortProduct.appendChild(price_product)
+            sortProduct.appendChild(name_product)
+            container.appendChild(sortProduct)
+            container.className = 'd-flex gap-2 col-12'
+            sortProduct.className = 'd-flex gap-2'
+            IconMin.style.cursor = "pointer"
+            IconPlus.style.cursor = "pointer"
+            
+            IconPlus.addEventListener('click', (event) => {
+                event.preventDefault()
+
+                countProduct = countProduct + 1
+                count.innerHTML = countProduct
+                
+                // به‌روزرسانی مرجع count
+                productReference.count = countProduct;
+            })
+
+            IconMin.addEventListener('click', async (event) => {
+                event.preventDefault()
+                if (countProduct != 0) {
+                    countProduct = countProduct - 1
+                    count.innerHTML = countProduct
+                    
+                    // به‌روزرسانی مرجع count
+                    productReference.count = countProduct;
+
+                } else {
+                    count.innerHTML = 0
+                    
+                    // به‌روزرسانی مرجع count به صفر
+                    productReference.count = 0;
+                }
+            })
+        }
+    }
+    
+    var parcelName = {}
+    var FormName = document.getElementById('form-name')
+    var sub = productLIst.querySelector('.confirmListProduct')
+    sub.addEventListener('click', async (event) => {
+        console.log(addParcel);
+
+        var formData = new FormData(FormName)
+        for (var [key, value] of formData.entries()) {
+            parcelName[key] = value
+        }
+
+        fetch(`http://127.0.0.1:8000/parcel/add_parcel/?name=${parcelName['name']}&last_name=${parcelName['last_name']}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+
+            body: JSON.stringify({
+                data: addParcel,
+            }),
+
+        }).then(res => { return res.json() }).then(data => {
+                    console.log(data);
+                    
         })
-    });
+
+    })
+});
 
 
 //show list parcel for customer
@@ -580,7 +537,7 @@ butClick.addEventListener('click', async (event) => {
         return res.json()
 
     }).then((data) => {
-        var showParcel= document.getElementById('showSend')
+        var showParcel = document.getElementById('showSend')
         for (var i = 0; i < data.length; i++) {
             if (data[i].status == 'تایید شده توسط غرفه دار') {
                 let nameProduct = data[i].nameProduct
@@ -602,10 +559,10 @@ butClick.addEventListener('click', async (event) => {
                 let statusProduct = data[i].status
                 let divStatus = document.createElement('div')
                 divStatus.innerHTML = statusProduct
-                let Button =document.createElement('button')
-                Button.innerText='click me'
+                let Button = document.createElement('button')
+                Button.innerText = 'click me'
 
-                Button.style.height='50px' 
+                Button.style.height = '50px'
                 var showSend = document.createElement('div')
                 showSend.appendChild(divNameProduct)
                 showSend.appendChild(divPrice)
@@ -614,35 +571,35 @@ butClick.addEventListener('click', async (event) => {
                 showSend.appendChild(divStatus)
                 showSend.appendChild(Button)
                 showSend.className = ' d-flex col-3 flex-column gap-2 border border border-black '
-                showParcel.className='row d-flex p-2'
+                showParcel.className = 'row d-flex p-2'
                 showParcel.appendChild(showSend)
-                Button.addEventListener('click',async (event)=> { 
-                    fetch(`http://127.0.0.1:8000/parcel/post_vendor/?name=${parcelSend['name']}&last_name=${parcelSend['last_name']}`).then(res=>{ 
+                Button.addEventListener('click', async (event) => {
+                    fetch(`http://127.0.0.1:8000/parcel/post_vendor/?name=${parcelSend['name']}&last_name=${parcelSend['last_name']}`).then(res => {
                         return res.json()
                     }).then(
-                        data=>{ 
-                            showParcel.innerHTML=''
+                        data => {
+                            showParcel.innerHTML = ''
                             var showSend = document.createElement('div')
-                            let getStatus = data.statusDelivery 
+                            let getStatus = data.statusDelivery
                             let status = document.createElement('div')
-                            status.innerHTML=getStatus
+                            status.innerHTML = getStatus
                             let name = document.createElement('div')
-                            let getName = data.name_customer 
-                            name.innerHTML = getName 
+                            let getName = data.name_customer
+                            name.innerHTML = getName
                             let lastName = document.createElement('div')
-                            let getLast = data.lastName_customer 
-                            lastName.innerHTML = getLast 
+                            let getLast = data.lastName_customer
+                            lastName.innerHTML = getLast
                             let id = document.createElement('div')
-                            let getId =data.parcel_id
-                            id.innerHTML = getId 
+                            let getId = data.parcel_id
+                            id.innerHTML = getId
                             let price = document.createElement('div')
-                            let getPrice = data.price_delivery 
+                            let getPrice = data.price_delivery
                             price.innerHTML = getPrice
                             showSend.appendChild(name)
                             showSend.appendChild(lastName)
                             showSend.appendChild(id)
                             showSend.appendChild(price)
-                            showSend.className= ' d-flex flex-column '
+                            showSend.className = ' d-flex flex-column '
                             showParcel.appendChild(showSend)
                         }
                     )

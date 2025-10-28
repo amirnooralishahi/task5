@@ -773,18 +773,25 @@ class RepositoryParcel(ABC, Generic[T, V]):
 
 
     @classmethod
-    def get_parcel(
+    async  def get_parcel(
             cls,
-            parcel_id: int=None,
-            invoice_id: int = None,
+            parcel_id: Optional[int]=None,
+            invoice_id:  Optional[int] = None,
+            customer_id : Optional[int]=None,
+            vendor_id : Optional[List[int]] =None
+
     ):
+        print(vendor_id)
+
         params = Parameters()
         query = cls.select_query()
         if invoice_id :
-            query = query.where(cls.field('invoice_id').eq(params.make(invoice_id)))
+            query = query.where(cls.field('invoice_id').eq((invoice_id)))
         if parcel_id :
-            query = query.where(cls.field('id').eq(params.make(parcel_id)))
-
+            query = query.where(cls.field('id').eq((parcel_id)))
+        if customer_id and vendor_id :
+            query= query.where(cls.field('customer_id').eq((customer_id)))
+            query = query.where(cls.field('vendor_id').isin((vendor_id)))
         query = query.select(cls.table().star)
 
-        return cls.first(query=query, params=params)
+        return await cls.get(query=query)

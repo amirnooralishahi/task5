@@ -14,12 +14,12 @@ class parcelItem(ModelAbstract):
 
     id : int
     parcel_id : int
-    price: Decimal
+    price: int
     product_id: int
     count: int
     created_at: datetime
     updated_at: datetime
-    share_company: Decimal
+    share_company: int
 
     def parcel(self)->int:
         return self.relation('parcel')
