@@ -1,17 +1,18 @@
 from decimal import Decimal
+from typing import List
 
 from pydantic import BaseModel
 
 
 
 class ShowParcel(BaseModel):
-    id:int
-    TotalPrice : int
-    price: int
-    nameProduct : str
-    count : int
-    status:str
-    origin: str
+    id:List[int]|int
+    TotalPrice : List[int]|int
+    price: List[int]|int
+    nameProduct :List[str]|str
+    count : List[int]|int
+    status:List[str]|str
+    origin: List[str]|str
 
 class ShowCancelParcel(BaseModel):
     TotalPrice: int

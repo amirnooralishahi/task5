@@ -18,14 +18,14 @@ class CreateParcelSchema(BaseModel):
 
 
 class ProductParcelSchema(BaseModel):
-    id: int
-    vendor_id: List[int]
+
+    vendor_id: List[int]|int
     customer_id: int
     price: int
     count:int
     share_company:Optional[int]
-    invoice_id : int
-    created_at:int
+    invoice_id : List[int]|int
+    created_at:datetime.datetime
     origin:str
     status : str
     delivery:str

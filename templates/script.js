@@ -441,10 +441,10 @@ subName.addEventListener('click', async (event) => {
                 vendorLastName.innerHTML = data[i].last_name
                 show.appendChild(vendorLastName)
                 vendorLastName.className = 'd-flex flex-column border border-black p-2 col-2'
-                let vendorPhone = document.createElement('div')
-                vendorPhone.innerHTML = data[i].phone
-                show.appendChild(vendorPhone)
-                vendorPhone.className = 'd-flex flex-column border border-black p-2 col-2'
+                let vendor_Phone = document.createElement('div')
+                vendor_Phone.innerHTML = data[i].phone
+                show.appendChild(vendor_Phone)
+                vendor_Phone.className = 'd-flex flex-column border border-black p-2 col-2'
                 let vendorBalance = document.createElement('div')
                 vendorBalance.innerHTML = data[i].balance
                 show.appendChild(vendorBalance)
@@ -517,6 +517,7 @@ subName.addEventListener('click', async (event) => {
 
 let formSend = document.getElementById('sendParcel')
 let butClick = formSend.querySelector('.send-click')
+butClick.className='border border-danger'
 let parcelSend = {}
 butClick.addEventListener('click', async (event) => {
     event.preventDefault()
@@ -525,7 +526,7 @@ butClick.addEventListener('click', async (event) => {
         parcelSend[key] = value
     }
     fetch(`http://127.0.0.1:8000/parcel/parcel-vendor/?name=${parcelSend['name']}&last_name=${parcelSend['last_name']}`).then(async res => {
-        console.log(res.json);
+        
         if (res.status == 404) {
             var json = await res.json()
             const error = json.detail
@@ -537,9 +538,13 @@ butClick.addEventListener('click', async (event) => {
         return res.json()
 
     }).then((data) => {
+        console.log(data);
+        
         var showParcel = document.getElementById('showSend')
         for (var i = 0; i < data.length; i++) {
-            if (data[i].status == 'تایید شده توسط غرفه دار') {
+            if (data[i].status == 'PARCEL_CONFIRM_BY_VENDOR') {
+
+
                 let nameProduct = data[i].nameProduct
                 let divNameProduct = document.createElement('div')
                 divNameProduct.innerHTML = nameProduct
@@ -559,6 +564,7 @@ butClick.addEventListener('click', async (event) => {
                 let statusProduct = data[i].status
                 let divStatus = document.createElement('div')
                 divStatus.innerHTML = statusProduct
+
                 let Button = document.createElement('button')
                 Button.innerText = 'click me'
 
@@ -572,15 +578,19 @@ butClick.addEventListener('click', async (event) => {
                 showSend.appendChild(Button)
                 showSend.className = ' d-flex col-3 flex-column gap-2 border border border-black '
                 showParcel.className = 'row d-flex p-2'
+
                 showParcel.appendChild(showSend)
                 Button.addEventListener('click', async (event) => {
+                    event.preventDefault()
                     fetch(`http://127.0.0.1:8000/parcel/post_vendor/?name=${parcelSend['name']}&last_name=${parcelSend['last_name']}`).then(res => {
+                        
                         return res.json()
-                    }).then(
-                        data => {
+                    }).then((data) => {
+                            
+                            for (var i =0 ; i<data.length; i++){
                             showParcel.innerHTML = ''
                             var showSend = document.createElement('div')
-                            let getStatus = data.statusDelivery
+                            let getStatus = data[i].statusDelivery
                             let status = document.createElement('div')
                             status.innerHTML = getStatus
                             let name = document.createElement('div')
@@ -600,12 +610,17 @@ butClick.addEventListener('click', async (event) => {
                             showSend.appendChild(id)
                             showSend.appendChild(price)
                             showSend.className = ' d-flex flex-column '
-                            showParcel.appendChild(showSend)
+                            showParcel.appendChild(showSend)}
+                            alert('سفارش در حالت ارسال قرار گرفت ')
+                            console.log(data);
+                            
                         }
                     )
                 })
 
             }
+        console.log(data);
+   
         }
     })
 

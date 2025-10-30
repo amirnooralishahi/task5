@@ -19,7 +19,7 @@ class parcelItem(ModelAbstract):
     count: int
     created_at: datetime
     updated_at: datetime
-    share_company: int
+    share_company: Decimal
 
     def parcel(self)->int:
         return self.relation('parcel')
