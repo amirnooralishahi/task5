@@ -373,7 +373,6 @@ async def add_item_parcel(name: str, last_name: str, data: Dict[str, Dict[str, A
 
     customer_id =get_customer[0].get('id')
     customer_origin=get_customer[0].get('origin')
-    customer_balance = get_customer[0].get('balance')
     value_invoice = {
         'customer_id':customer_id,
         'status': EnumInvoice.INVOICE_AWAIT_FOR_CONFIRM,
@@ -387,11 +386,14 @@ async def add_item_parcel(name: str, last_name: str, data: Dict[str, Dict[str, A
     for key, value in data.get('data').items():
         structured_data[key] = value
     for vendor , choice_product in structured_data.items():
+        name_vendor = vendor.split('-')[0]
+        last_name_vendor = vendor.split('-')[1]
         for item in choice_product:
+            print(item)
             list_product.append({
-                'vendor_name':item.get('vendorName'),
-                'vendor_last_name':item.get('vendorLastName'),
-                'nameProduct':item.get('nameProduct'),
+                'vendor_name':name_vendor,
+                'vendor_last_name':last_name_vendor,
+                'nameProduct':item.get('product_name'),
                 'price':item.get('price'),
                 'count':item.get('count'),
             })
@@ -400,9 +402,7 @@ async def add_item_parcel(name: str, last_name: str, data: Dict[str, Dict[str, A
     total_amount = 0
     total_item_count = 0
     total_share_company = decimal.Decimal(0)
-    current_parcelItem_data: List[Dict[str, Any]] = []
     productive: List[Dict[str, Any]] = []
-    current_vendor_items: List[Dict[str, Any]] = []
     vendor_name=[key.split('-')[0] for key , value in structured_data.items()]
     vendor_last_name=[key.split('-')[1] for key , value in structured_data.items()]
     vendor_info = await get_and_check_entity(
@@ -416,7 +416,6 @@ async def add_item_parcel(name: str, last_name: str, data: Dict[str, Dict[str, A
     }
 
     vendor_id_list=[value.get('id') for value in vendor_info]
-    vendor_share_rate=[item['share'] for item in vendor_info]
     item_price = [int(item.get("price"))
                   for vendor, products_list in structured_data.items()
                   for item in products_list ]
@@ -436,9 +435,10 @@ async def add_item_parcel(name: str, last_name: str, data: Dict[str, Dict[str, A
     product_map = {
         (p.get('name'), p.get('vendor_id')): p for p in product
     }
-    product_total_price = [int(count) * int(price) for count, price in zip(item_count, item_price)]
 
-
+    sum_total_price=[]
+    sum_count_product=[]
+    sum_share_company=[]
     dictProduct ={'name': name_product,
                   'price': item_price,
                   'count': item_count }
@@ -446,32 +446,31 @@ async def add_item_parcel(name: str, last_name: str, data: Dict[str, Dict[str, A
     if update !=status.HTTP_200_OK:
         raise HTTPException(status_code=406, detail='موجودی کافی نیست')
     current_vendor_items: List[Dict[str, Any]] = []
-
+    create_parcelItem=[]
+    production={}
     for item in list_product:
+
         vendor_id = next(
             (v.get('id') for v in vendor_info if
              v.get('name') == item['vendor_name'] and v.get('last_name') == item['vendor_last_name']),
             None
         )
-        print(list_product)
 
         if vendor_id is None:
             raise HTTPException(status_code=400, detail=f"غرفه دار {item['vendor_name']} یافت نشد.")
 
         vendor_share_rate = vendor_share_map.get(vendor_id, 0)  # نرخ سهم غرفه دار
 
-        product_key = (item['product_name'], vendor_id)
+        product_key = (item['nameProduct'], vendor_id)
         db_product = product_map.get(product_key)
 
         if not db_product:
-            raise HTTPException(status_code=400, detail=f"محصول {item['product_name']} برای غرفه دار یافت نشد.")
+            raise HTTPException(status_code=400, detail=f"محصول {item['nameProduct']} برای غرفه دار یافت نشد.")
 
         product_price = db_product.get("price")
         item_count = item['count']
-
         total_item_price = product_price * item_count
         share_company_cost = decimal.Decimal(total_item_price) * decimal.Decimal(vendor_share_rate)
-
         parcel_item_data = {
             'product_id': db_product.get('id'),
             'price': product_price,
@@ -479,63 +478,84 @@ async def add_item_parcel(name: str, last_name: str, data: Dict[str, Dict[str, A
             'share_company': share_company_cost,
             'vendor_id': vendor_id,
         }
-
-        current_vendor_items.append(parcel_item_data)
         total_amount += total_item_price
+        sum_total_price.append(total_amount)
         total_item_count += item_count
-        total_share_company += share_company_cost    #
+        sum_count_product.append(total_item_count)
+        total_share_company += share_company_cost
+        sum_share_company.append(total_share_company)
+        current_vendor_items.append(parcel_item_data)
+        key_vendor = 'vendor_id'
 
-    production = {
-        'vendor_id': vendor_id,
-        'customer_id': customer_id,
-        'price': total_amount,
-        'count':total_item_count,
-        'share_company': total_share_company,
-        'invoice_id': get_invoice[0].id,
-        'created_at': datetime.datetime.now(),
-        'origin':  customer_origin,
-        'status': EnumInvoice.PARCEL_AWAIT_FOR_CONFIRM,
-        'delivery': EnumInvoice.STATUS_DELIVERY,
-        'methodpost': EnumInvoice.METHOD_POST
-    }
-    productive.append(production)
-    get_parcel = await RepositoryParcel.get_parcel(vendor_id=[vendor_id], customer_id=customer_id)
-    print(get_parcel)
-    if not get_parcel:
-        create_parcels = await RepositoryParcel.create_return_many(productive)
-        new_parcel_id = create_parcels[0].id
-        for item_data in current_vendor_items:
-            item_data['parcel_id'] = new_parcel_id
-            current_parcelItem_data.append(item_data)
+        if key_vendor not in production :
+            production[key_vendor] =vendor_id
+        elif production[key_vendor] == vendor_id :
+             production[key_vendor] = None
+        if item == list_product[-1]:
+            productionUpdate = {
 
-        get_parcel = create_parcels
-    else:
-        existing_parcel_id = get_parcel[0].id
+                'customer_id': customer_id,
+                'price': sum(sum_total_price),
+                'count': sum(sum_count_product),
+                'share_company': sum(sum_share_company),
+                'invoice_id': get_invoice[0].id,
+                'created_at': datetime.datetime.now(),
+                'origin': customer_origin,
+                'status': EnumInvoice.PARCEL_AWAIT_FOR_CONFIRM,
+                'delivery': EnumInvoice.STATUS_DELIVERY,
+                'methodpost': EnumInvoice.METHOD_POST
+            }
+            production.update(productionUpdate)
+            productive.append(production)
+            print(productive)
+            get_parcel = await RepositoryParcel.get_parcel(vendor_id=[vendor_id], customer_id=customer_id)
 
-        for item_data in current_vendor_items:
-            item_data['parcel_id'] = existing_parcel_id
-        await RepositoryItem.create_return_many(current_vendor_items)
-    kafka_manager = kafka()
-    await kafka_manager.start()
-    await kafka_manager.produce(get_parcel)
-    await kafka_manager.stop()
-    createProduct = await RepositoryItem.create_return_many(current_parcelItem_data)
+            sum_total_price=[]
+            sum_count_product=[]
+            sum_share_company=[]
 
 
 
-    return ProductParcelSchema(
-        vendor_id=vendor_id_list,
-        customer_id= customer_id,
-        price=total_amount,
-        count=total_item_count,
-        share_company=int(total_share_company),
-        invoice_id=get_invoice[0].id,
-        created_at=datetime.datetime.now(),
-        origin= customer_origin,
-        status=EnumInvoice.PARCEL_AWAIT_FOR_CONFIRM,
-        delivery=EnumInvoice.STATUS_DELIVERY,
-        methodpost=EnumInvoice.METHOD_POST
-    )
+
+
+
+    print(productive)
+
+    # if not get_parcel:
+    #     create_parcels = await RepositoryParcel.create_return_many(productive)
+    #     new_parcel_id = create_parcels[0].id
+    #     for item_data in current_vendor_items:
+    #         item_data['parcel_id'] = new_parcel_id
+    #         current_parcelItem_data.append(item_data)
+
+        # get_parcel = create_parcels
+    # else:
+    #     existing_parcel_id = get_parcel[0].id
+    #
+    #     for item_data in current_vendor_items:
+    #         item_data['parcel_id'] = existing_parcel_id
+    #     await RepositoryItem.create_return_many(current_vendor_items)
+    # kafka_manager = kafka()
+    # await kafka_manager.start()
+    # await kafka_manager.produce(get_parcel)
+    # await kafka_manager.stop()
+    # createProduct = await RepositoryItem.create_return_many(current_parcelItem_data)
+    #
+    #
+    #
+    # return ProductParcelSchema(
+    #     vendor_id=vendor_id_list,
+    #     customer_id= customer_id,
+    #     price=total_amount,
+    #     count=total_item_count,
+    #     share_company=int(total_share_company),
+    #     invoice_id=get_invoice[0].id,
+    #     created_at=datetime.datetime.now(),
+    #     origin= customer_origin,
+    #     status=EnumInvoice.PARCEL_AWAIT_FOR_CONFIRM,
+    #     delivery=EnumInvoice.STATUS_DELIVERY,
+    #     methodpost=EnumInvoice.METHOD_POST
+    # )
 
 @router.get('/cancel_invoice/',response_model=ShowCancelInvoice)
 async def cancel_invoice(invoice_id:int,name:str ,last_name:str):
