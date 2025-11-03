@@ -3,6 +3,8 @@ venv/
 __pycache__/
 .eggs
 .idea/
+.idea
 templates/node_modules
 templates/package-lock.json
 templates/package.json
+connect.py
