@@ -35,3 +35,8 @@ class ProductParcelSchema(BaseModel):
 
 
 
+class SendProductToCustomerSchema(BaseModel):
+    vendor_id : int
+    parcel_id : int
+    invoice_id : int
+    status : str

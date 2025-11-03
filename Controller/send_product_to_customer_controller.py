@@ -1,20 +1,26 @@
 ﻿from hepler.helper_parcel import get_and_check_entity
 from repository.Invoice import RepositoryInvoice
 from repository.parcelRepo import RepositoryParcel
+from schema.SchemaParcel import SendProductToCustomerSchema
 
 
-from fastapi import FastAPI,APIRouter
-router = APIRouter()
+class sendProductToCustomerController:
 
-@router.get('send_product_to_customer/{parcel_id}')
-async def send_product_to_customer(parcel_id:int ):
+
+    def __init__(self, parcel_id:int):
+        self.parcel_id = parcel_id
+
+
+
+
+    async def process(self):
         get_parcel =await get_and_check_entity(
             RepositoryParcel,
-            parcel_id,
+            self.parcel_id,
             'id',
             'this parceel is not exist'
         )
-        await RepositoryParcel.update_by_id(parcel_id , {'delivery':'ارسال شده توسط غرفه دار'})
+        await RepositoryParcel.update_by_id(self.parcel_id , {'delivery':'ارسال شده توسط غرفه دار'})
         invoice_id = get_parcel[0].get('invoice_id')
         await get_and_check_entity(
             RepositoryInvoice,
@@ -31,4 +37,9 @@ async def send_product_to_customer(parcel_id:int ):
                 for index in get_all_parcel
                 for value in index.values() if value =='ارسال شده توسط غرفه دار']
 
-        return {'message':'done'}
+        return SendProductToCustomerSchema(
+            vendor_id=get_parcel[0].get('vendor_id'),
+            parcel_id=get_parcel[0].get('id'),
+            invoice_id=get_parcel[0].get('invoice_id'),
+            status=get_parcel[0].get('status')
+        )
