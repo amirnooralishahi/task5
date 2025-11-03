@@ -4,85 +4,151 @@ let selectedParcelIds = [];
 fetch('http://127.0.0.1:8000/parcel/vendor/list_product/')
     .then((res) => res.json())
     .then(products => {
-        const form = document.getElementById('form-name');
-        const container = document.getElementById('product_list_container');
-        const productList = document.getElementById('product_list');
-        let addParcel = {};
+        // 💡 FIX 1: استخراج شیء داده اصلی از آرایه (products[0])
+        const vendorData = products; 
 
-        for (let i = 0; i < products.length; i++) {
-            let countProduct = 0;
+        let form = document.getElementById('form-name');
+        let container = document.getElementById('product_list_container');
+        let productList = document.getElementById('product_list');
+        let addParcel = {}; 
+        console.log(vendorData);
+        
+        
+        
+        for (let i = 0; i < Object.keys(products).length; i++) {
+            const nameVendorian = vendorData[i][i].nameVendor + '-' + vendorData[i][i].lastNameVendor; 
 
-            const IconMin = document.createElement('div');
-            const IconPlus = document.createElement('div');
-            const count = document.createElement('div');
-            IconPlus.innerHTML = '<i class="bi bi-plus"></i>';
-            IconMin.innerHTML = '<i class="bi bi-dash"></i>';
-            count.innerHTML = countProduct;
-            IconPlus.style.cursor = "pointer";
-            IconMin.style.cursor = "pointer";
-
-            const nameVendorian = products[i].name_vendor + '-' + products[i].last_name_vendor;
-            if (!addParcel[nameVendorian]) {
-                addParcel[nameVendorian] = [];
-            }
-
+        if (!addParcel[nameVendorian]) {
+            addParcel[nameVendorian] = [];
+        }
+            let countProduct = 0; 
+        console.log(vendorData[i][i]);
+            
             const newProduct = {
-                product_name: products[i].name,
-                price: products[i].price,
-                count: 0
+                product_name: vendorData[i][i].nameProduct, 
+                price: vendorData[i][i].price, 
+                count: 0 
             };
+
+            // ذخیره ارجاع به این شیء در ساختار addParcel
             addParcel[nameVendorian].push(newProduct);
-            const productReference = newProduct;
+            let productReference = newProduct; 
 
-            const sortProduct = document.createElement('div');
-            sortProduct.className = 'd-flex gap-2 border border-black p-2';
+            // ... (کدهای DOM) ...
+            
+            let divFull = document.createElement('div')
+            let nameProduct = document.createElement('div')
+            nameProduct.innerHTML = vendorData[i][i].nameProduct
+            divFull.appendChild(nameProduct)
 
-            const name_product = document.createElement('div');
-            name_product.innerHTML = products[i].name;
-            const price_product = document.createElement('div');
-            price_product.innerHTML = products[i].price;
+            let priceProduct = document.createElement('div')
+            priceProduct.innerHTML = vendorData[i][i].price
+            divFull.appendChild(priceProduct)
 
-            sortProduct.appendChild(name_product);
-            sortProduct.appendChild(price_product);
-            sortProduct.appendChild(IconPlus);
-            sortProduct.appendChild(count);
-            sortProduct.appendChild(IconMin);
-            container.appendChild(sortProduct);
+            let icons = document.createElement('div')
+            let IconPlus = document.createElement('div')
+            IconPlus.innerHTML = '<i class="bi bi-plus"></i>'
+            icons.appendChild(IconPlus)
 
+            let count = document.createElement('div')
+            count.innerHTML = countProduct
+            icons.appendChild(count)
+
+
+            let IconMin = document.createElement('div')
+            IconMin.innerHTML = '<i class="bi bi-dash"></i>'
+            icons.appendChild(IconMin)
+
+            icons.className = 'd-flex gap-3'
+            divFull.appendChild(icons)
+            divFull.className = 'd-flex flex-column gap-3 align-items-center'
+            
+            // --- Event Listeners ---
             IconPlus.addEventListener('click', (event) => {
                 event.preventDefault();
                 countProduct++;
                 count.innerHTML = countProduct;
-                productReference.count = countProduct;
+                // به‌روزرسانی مقدار count در شیء اصلی addParcel
+                productReference.count = countProduct; 
             });
+            IconPlus.style.cursor = "pointer"
 
             IconMin.addEventListener('click', (event) => {
                 event.preventDefault();
                 if (countProduct > 0) countProduct--;
                 count.innerHTML = countProduct;
-                productReference.count = countProduct;
+                productReference.count = countProduct; 
             });
+            IconMin.style.cursor = "pointer"
+
+            divFull.className = 'd-flex flex-column gap-3'
+            container.appendChild(divFull)
+            container.className = 'd-flex gap-3'
         }
 
-        const formName = document.getElementById('form-name');
-        const sub = productList.querySelector('.confirmListProduct');
+        // --- منطق ارسال ---
+        let formName = document.getElementById('form-name');
+        let sub = productList.querySelector('.confirmListProduct');
         sub.addEventListener('click', async (event) => {
             event.preventDefault();
             let parcelName = {};
             const formData = new FormData(formName);
-            for (const [key, value] of formData.entries()) parcelName[key] = value;
+            
+            // 💡 FIX: حذف آلودگی. فقط اطلاعات فرم در parcelName ذخیره می‌شود.
+            for (const [key, value] of formData.entries()) {
+                parcelName[key] = value
+                // ❌ خطای زیر حذف شد: addParcel[key]=value
+            };
+
+            let finalAddParcel = {};
+            for (const vendorKey in addParcel) {
+                if (addParcel.hasOwnProperty(vendorKey) && Array.isArray(addParcel[vendorKey])) {
+                    const filteredProducts = addParcel[vendorKey].filter(product => product.count > 0);
+                    if (filteredProducts.length > 0) {
+                        finalAddParcel[vendorKey] = filteredProducts;
+                    }
+                }
+            }
+            
+            // بررسی اینکه حداقل یک محصول انتخاب شده باشد
+            if (Object.keys(finalAddParcel).length === 0) {
+                alert("لطفاً حداقل یک محصول را برای خرید انتخاب کنید.");
+                return;
+            }
 
             fetch(`http://127.0.0.1:8000/parcel/add_parcel/?name=${parcelName['name']}&last_name=${parcelName['last_name']}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ data: addParcel })
+                // ارسال داده‌های نهایی و فیلتر شده
+                body: JSON.stringify({ data: finalAddParcel }) 
             })
-                .then(res => res.json())
-                .then(data => console.log('✅ ثبت مرسوله:', data))
-                .catch(err => console.error('❌ خطا در ثبت مرسوله:', err));
+                .then(res => {
+                    if(res.status === 400){
+                        return res.json().then(errorData => {
+                            // نمایش پیام خطای 400 (مثل موجودی کافی نیست)
+                            alert(`خطا: ${errorData.detail}`);
+                            return Promise.reject(errorData); // برای پرش به catch
+                        });
+                    }
+                    if(!res.ok){
+                         throw new Error(`HTTP error! status: ${res.status}`);
+                    }
+                    return res.json();
+                })
+                .then(data => {
+                    console.log('✅ ثبت مرسوله:', data)
+                    
+                })
+                .catch(err => {
+                    if (err.detail) {
+                        // خطا قبلا مدیریت شده است
+                        return; 
+                    }
+                    console.error('❌ خطا در ثبت مرسوله:', err)
+                    alert('خطای ناشناخته در ثبت مرسوله رخ داد.')
+                });
         });
     });
-
 // نمایش سفارشات مشتری
 const parcelContainer = document.getElementById('parcel-customer');
 const formCustomer = document.getElementById('product-customer');

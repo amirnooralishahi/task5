@@ -70,8 +70,8 @@
                 </div>
                 
             </form>
-            <div class="list_product row gap-3 border border-primary" id="product_list">
-                    <div  id="product_list_container" class="d-flex    col-12">
+            <div class="list_product " id="product_list">
+                    <div  id="product_list_container" class="d-flex border border-black">
 
                     </div>
                     <button class="confirmListProduct">click me</button>
@@ -80,6 +80,7 @@
     </div>
     <hr>
     <br>
+    
     <div class="parcel-customer">
         <div class="parcel-customer-containe d-flex flex-column w-100 gap-5" id="parcel-customer">
             <div class="w-100 col-6 d-flex flex-column align-items-center gap-3 ">
@@ -99,6 +100,7 @@
             </div>
         </div>
     </div>
+
     <div class="vendor d-flex flex-column align-items-center">
         <div class="row vendor-container  gap-5">
             <h3 class="text-center">نمایش سفارش های غرفه دار</h3>
@@ -149,7 +151,7 @@
             </form>
             <form action="" id="cancle-form_invoice">
                 <label for="invoice">number_invoice</label>
-                <input type="number" name="invoice_id" id="cancel-invoice-input">
+                <input type="datetime" name="invoice_id" id="cancel-invoice-input">
                 <button class="submit-cancel">click me </button>
             </form>
             <div id="show_detail_invoice" class='d-flex  border border-black mt-3'></div>
@@ -182,6 +184,8 @@
 
         </div>
     </div>
+    
+    
     <div class="send-parcel">
         <div class="send-parcel-container"> 
             <form action="" id="sendParcel">
@@ -197,10 +201,12 @@
             
         </div>
     </div>
+
+
     <div class="check-parcel">
         <div class="check-parcel-container">
             <h3>چک کردن زمان تایید محصولات غرفه دار </h3>
-            <div class="checkVendorForm">
+            <div class="checkVendorForm d-flex justify-content-center">
                     <form action="" id="checkParcel">
                         <label for="name">first_name</label>
                         <input type="text" name="name">
@@ -208,6 +214,7 @@
                         <input type="text" name="last_name">
                         <button class="send-name">click me</button>
                     </form>
+                    <div id="showing"></div>
             </div>
              <div class="row d-flex border border-black w-100" id="show-parcel-check">
 
@@ -226,6 +233,32 @@
             <div id="showList" class="d-flex flex-column">
 
             </div>
+        </div>
+    </div>
+
+    <div class="add-product mt-5">
+        <div id="productView" class="add-product-container d-flex flex-column align-items-center"> 
+            <h3> افزودن محصول </h3>
+            <div class="formProduct" >
+ 
+                <form  class="d-flex gap-3" id="form-product">
+                    <div class="d-flex flex-column">
+                    <label for="name">first_name</label>
+                    <input type="text" name="name">
+                    <label for="last_name">last_name</label>
+                    <input type="text" name="last_name">
+                    </div>
+                    <div class="adding d-flex flex-column gap-3">
+                    <label for="nameProduct">name_product</label>
+                    <input type="text" name="nameProduct">
+                    <label for="number">number </label>
+                    <input type="number" name="number">
+                    <label for="price">price</label>
+                    <input type="number" name="price">
+                    </div>
+                    <button class="sendInfo">click me</button>
+                </form>
+             </div>
         </div>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"

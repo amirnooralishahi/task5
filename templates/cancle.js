@@ -87,8 +87,13 @@ subcancle.addEventListener('click', async (event) => {
                     throw new Error(data.detail || '404 Error');
                 });
             }
-
-            if (!res.ok) {
+            else if (res.status===405 ){ 
+                show_detail.innerHTML= 'این شماره سفارش برای شما نیست'
+                return res.json().catch(()=>({ detail: 'Not Found' })).then(data=> { 
+                    throw new Error(data.detail || '405 forbidden')
+                })
+            }
+            else if (!res.ok) {
                 return res.json().catch(() => ({ detail: `خطا در سرور با کد: ${res.status}` })).then(data => {
                     throw new Error(data.detail || `خطا در سرور با کد: ${res.status}`);
                 });

@@ -17,7 +17,7 @@ function updateConfirmationArea() {
     // ارجاع صحیح به المان
     let choice_product = document.getElementById('showList'); 
     choice_product.innerHTML = ''; // پاک کردن محتوای قبلی
-
+    choice_product.className='d-flex justify-content-center align-items-center'
     // مدیریت نمایش فرم زمان‌سنجی
     if (timeCheckForm) {
         if (selectedParcelIdss.length > 0) {
@@ -59,7 +59,7 @@ function updateConfirmationArea() {
             // 🛠️ FIX 2: ساخت URL به روش استاندارد FastAPI (parcel_id=3&parcel_id=4)
             const urlParams = uniqueIds.map(id => `parcel_id=${id}`).join('&');
 
-            const url = `${serverIP}/submit/?${urlParams}`;
+            const url = `${serverIP}/check_parcel_expire/?${urlParams}`;
 
             try {
                 const response = await fetch(url);
@@ -113,36 +113,60 @@ submit_name_vendors.addEventListener('click', async (event) => {
             return;
         }
 
-        // ایجاد هدر
-        const headerContainer = document.createElement('div');
-        headerContainer.className = 'row d-flex border-bottom border-black w-100 mb-2 font-weight-bold text-center';
-        headerContainer.innerHTML = `<div class="col-2"><strong>ID</strong></div><div class="col-2"><strong>محصول</strong></div><div class="col-2"><strong>قیمت</strong></div><div class="col-2"><strong>قیمت کل</strong></div><div class="col-2"><strong>وضعیت</strong></div><div class="col-2"><strong>تعداد</strong></div>`;
-        showParcelDiv.appendChild(headerContainer);
+        let showing = document.getElementById('showing')
+            showing.className= 'row d-flex justify-content-center  border border-black w-100 gap-2'
+        let parcelIdToSelect=[]
+        let number = 0
+        for (let i = 0; i <data.id.length; i++) {
 
-
-        // --- ایجاد المنت‌ها برای هر سفارش و Listener انتخاب ---
-        for (let i = 0; i < data.length; i++) {
             
-            const parcelIdToSelect = data[i].id;
-            
-            const parcelContainer = document.createElement('div');
-            parcelContainer.className = 'row d-flex border border-black w-100 mb-2 align-items-center text-center';
+             let parcelContainer = document.createElement('div');
+            parcelContainer.className= 'row d-flex justify-content-center  border border-black w-100 gap-2'
             parcelContainer.style.cursor = "pointer"; 
+            
+            
+            let divId= document.createElement('div')
+            divId.innerHTML = data.id[i] 
+            divId.className= ' d-flex flex-column align-items-center text-center'
+            parcelContainer.appendChild(divId)
+            number = data.id
 
-            parcelContainer.innerHTML = `
-                <div class="col-2 show_id"><strong>${parcelIdToSelect}</strong></div>
-                <div class="col-2">${data[i].nameProduct}</div>
-                <div class="col-2">${data[i].price}</div>
-                <div class="col-2">${data[i].TotalPrice}</div>
-                <div class="col-2">${data[i].status}</div>
-                <div class="col-2">${data[i].count}</div>
-            `;
+            let divName = document.createElement('div')
+            divName.innerHTML=data.nameProduct[i]
+            divName.className= 'd-flex flex-column align-items-center border border-black'            
+            parcelContainer.appendChild(divName)
+
+            let divPrice = document.createElement('div')
+            divPrice.innerHTML= data.price[i]
+            divPrice.className= ' d-flex flex-column align-items-center border border-black'            
+
+            parcelContainer.appendChild(divPrice)
+
             
-            showParcelDiv.appendChild(parcelContainer);
+            let divTotal = document.createElement('div')
+            divTotal.innerHTML =data.TotalPrice[i]
+            divTotal.className= ' d-flex flex-column align-items-center border border-black'            
+
+            parcelContainer.appendChild(divTotal)
+
+            let divStatus = document.createElement('div')
+            divStatus.innerHTML= data.status[i] 
+            divStatus.className= ' d-flex flex-column align-items-center border border-black'            
+
+            parcelContainer.appendChild(divStatus)
+
+            let divCount = document.createElement('div')
+            divCount.innerHTML= data.count[i] 
+            divCount.className= ' d-flex flex-column align-items-center border border-black'            
+            parcelContainer.appendChild(divCount)
             
-            // 🛠️ FIX 3: Listener انتخاب روی کل Container اعمال می‌شود و logic کاملاً صحیح است.
+            
+            
+            showing.appendChild(parcelContainer)
             parcelContainer.addEventListener('click', (event) => {
                 event.preventDefault();
+                parcelIdToSelect.push(data.id[i])
+                console.log(number);
                 
                 const index = selectedParcelIdss.indexOf(parcelIdToSelect);
 
@@ -192,7 +216,7 @@ sendNumButton.addEventListener('click', async (event) => {
 
     const serverIP = 'http://127.0.0.1:8000';
     // 🛠️ FIX 5: اصلاح URL برای check_parcel_time
-    const destinationUrl = `${serverIP}/parcel/check_parcel_time/?parcel_id=${parcelIdToSend}&time_value=${timeValue}`;
+    const destinationUrl = `${serverIP}/parcel/check_parcel_expire/?time=${timeValue}&parcel_id=${parcelIdToSend}`;
 
     try {
         const response = await fetch(destinationUrl);
@@ -212,3 +236,34 @@ sendNumButton.addEventListener('click', async (event) => {
         alert(`خطا: ${error.message}`);
     }
 });
+
+
+
+//add product to basket product  
+
+let form_product=document.getElementById('form-product')
+let productView= document.getElementById('productView')
+let subProduct = productView.querySelector('.sendInfo')
+subProduct.addEventListener('click',async (event)=>{
+    event.preventDefault()
+    let dataProduct =new FormData(form_product)
+    let parcel ={}
+    let addProduct = {}
+    for (var [key,value] of dataProduct.entries()){
+        parcel[key]=value
+        console.log(parcel);
+        
+    }
+    console.log(parcel);
+    
+    try{
+        fetch(`http://127.0.0.1:8000/parcel/add-product-by-vendor/?name=${parcel['name']}&last_name=${parcel['last_name']}`,{
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({parcel})
+            }).then(res =>{ 
+             res.json()}).then(data=>{
+
+             }).catch(err => console.error(err))
+    }catch{}
+})

@@ -1,11 +1,12 @@
 import datetime
 import decimal
+from traceback import print_tb
 from typing import Dict, Any, Set, Tuple, List, Union
 from fastapi import APIRouter,HTTPException,status,Query
-
+from decimal import Decimal
 import kafkaProject.expirationParcel
 from Enum.EnumInvoice import EnumInvoice
-from hepler.helper_parcel import get_and_check_entity, get_item_and_product_details
+from hepler.helper_parcel import get_and_check_entity, get_item_and_product_details, check_and_buy_item
 from repository.Customer import RepositoryCustomer
 from repository.Invoice import RepositoryInvoice
 from repository.Vendor import RepositoryVendor
@@ -37,9 +38,9 @@ async def send_product_to_customer(parcel_id:int ):
             'id',
             'this parceel is not exist'
         )
-        update =await RepositoryParcel.update_by_id(parcel_id , {'delivery':'ارسال شده توسط غرفه دار'})
+        await RepositoryParcel.update_by_id(parcel_id , {'delivery':'ارسال شده توسط غرفه دار'})
         invoice_id = get_parcel[0].get('invoice_id')
-        get_invoice = await get_and_check_entity(
+        await get_and_check_entity(
             RepositoryInvoice,
             invoice_id,
             'id',
@@ -50,34 +51,38 @@ async def send_product_to_customer(parcel_id:int ):
             invoice_id,
             'invoice_id'
         )
-
-        for index  in get_all_parcel[0:]:
-          if (value == 'ارسال شده توسط غرفه دار' for value in index.values()):
-              update_invoice =await  RepositoryInvoice.update_by_id(get_parcel[0].get('invoice_id'),{'delivery':'تمامی مرسوله های شما ارسال شده اند'})
+        value= [await  RepositoryInvoice.update_by_id(invoice_id,{'delivery':'تمامی مرسوله های شما ارسال شده اند'})
+                for index in get_all_parcel
+                for value in index.values() if value =='ارسال شده توسط غرفه دار']
 
         return {'message':'done'}
 
 @router.get('/vendor/list_product/')
 async def all_list_product():
-    query =await RepositoryProduct.all()
-    list_product= []
-    for item in query :
-        name_product=item.name
-        price=item.price
-        query_vendor = RepositoryVendor.select_where(RepositoryVendor.field('id').eq(item.vendor_id)).select('*')
-        execute_vendor=await  RepositoryVendor.execute_and_fetch(query_vendor)
-        name_vendor = execute_vendor[0].get('name')
-        last_name = execute_vendor[0].get('last_name')
-        show =ShowProductSchema(
-        name_vendor=name_vendor,
-        last_name_vendor=last_name,
-        price=price,
-        name=name_product,
-        )
-        list_product.append(show)
-    return list_product
+   all_list =await RepositoryProduct.all()
+   vendor_id = [value.vendor_id for value in all_list]
+   name_product = [value.name for value in all_list]
+   price = [value.price for value in all_list]
+   print(all_list)
+   get_vendor=  await RepositoryVendor.find_by_many_id(vendor_id)
+   vendor = {
+       value.id:{'name':value.name,'last_name':value.last_name}
+       for value in get_vendor
+   }
+   listProduct = []
+   for i in range(len(vendor_id)):
+       for key , value in vendor.items():
+           if vendor_id[i] == key :
+               show= {i:{
+                   'nameVendor': value['name'],
+                   'lastNameVendor': value['last_name'],
+                   'nameProduct': name_product[i],
+                   'price': price[i],
+               }}
+               listProduct.append(show)
 
-
+   print(listProduct)
+   return  listProduct
 
 @router.get('/parcel-customer/')
 async def get_parcel_for_customer(name:str , last_name:str):
@@ -192,25 +197,25 @@ async def get_parcelItem_for_vendor(name:str , last_name:str):
         identifier=id_product,
 
     )
-    for value in execute_product:
-        name_product = value['name']
-        price_product = value['price']
-        priceParcel = value['price']
-        countParcel = execute_parcel[0].get('count')
-        statusParcel=execute_parcel[0].get('status')
-        originParcel = execute_parcel[0].get('origin')
-        show = ShowParcel(
-            id = id_parcelItem,
-            TotalPrice =priceParcel,
-            price = price_product,
-            nameProduct = name_product,
-            count = countParcel,
-            status= statusParcel,
-            origin = originParcel
-        )
-        list_product.append(show)
-    return list_product
 
+    name_product=[value['name'] for value in execute_product]
+    price_product=[value['price'] for value in execute_product]
+    price_parcel=[value['price']for value in execute_parcel]
+    count_parcel = [value['count']for value in execute_parcel]
+    status_parcel = [value['status'] for value in execute_parcel]
+    origin_parcel = [value['origin'] for value in execute_parcel]
+
+    show = ShowParcel(
+        id = id_parcelItem,
+        TotalPrice =price_parcel,
+        price = price_product,
+        nameProduct = name_product,
+        count = count_parcel,
+        status= status_parcel,
+        origin = origin_parcel
+    )
+    list_product.append(show)
+    return show
 # @router.post('/add_parcel/')
 # async def add_item_parcel(name:str,last_name:str,data:dict[str,dict[str,Any]]=CreateParcelSchema):
 #     get_customer =await get_and_check_entity(
@@ -365,145 +370,168 @@ async def add_item_parcel(name: str, last_name: str, data: Dict[str, Dict[str, A
         field_name='name',
         last_name=last_name
     )
-    print(get_customer[0].get('id'))
 
-
+    customer_id =get_customer[0].get('id')
+    customer_origin=get_customer[0].get('origin')
+    customer_balance = get_customer[0].get('balance')
     value_invoice = {
-        'customer_id': get_customer[0].get('id'),
+        'customer_id':customer_id,
         'status': EnumInvoice.INVOICE_AWAIT_FOR_CONFIRM,
     }
 
-    get_invoice = await RepositoryInvoice.get_invoice(customer_id=get_customer[0].get('id'))
+    get_invoice = await RepositoryInvoice.get_invoice(customer_id=customer_id)
     if not get_invoice:
         get_invoice = await RepositoryInvoice.create_return(value_invoice)
-        print(get_invoice)
-    # id_invoice = get_invoice[0].get('id')
-    # # 2. آماده‌سازی داده‌ها و متغیرهای تجمیعی سراسری
-    unique_vendor_keys: Set[Tuple[str, str]] = set()
     structured_data = {}
-
+    list_product = []
     for key, value in data.get('data').items():
-        vendor_name, vendor_last_name = key.split('-', 1)
-        unique_vendor_keys.add((vendor_name, vendor_last_name))
         structured_data[key] = value
+    for vendor , choice_product in structured_data.items():
+        for item in choice_product:
+            list_product.append({
+                'vendor_name':item.get('vendorName'),
+                'vendor_last_name':item.get('vendorLastName'),
+                'nameProduct':item.get('nameProduct'),
+                'price':item.get('price'),
+                'count':item.get('count'),
+            })
 
-    # # 🛠️ FIX: متغیرهای تجمیعی سراسری برای ریترن نهایی
-    total_amount = 0  # جایگزین amount
+
+    total_amount = 0
     total_item_count = 0
-    total_share_company = decimal.Decimal(0)  # برای جلوگیری از خطای Decimal در جمع
-    current_parcelItem_data: List[Dict[str, Any]] = []  # آیتم‌های مرسوله‌های جدید
+    total_share_company = decimal.Decimal(0)
+    current_parcelItem_data: List[Dict[str, Any]] = []
     productive: List[Dict[str, Any]] = []
+    current_vendor_items: List[Dict[str, Any]] = []
+    vendor_name=[key.split('-')[0] for key , value in structured_data.items()]
+    vendor_last_name=[key.split('-')[1] for key , value in structured_data.items()]
+    vendor_info = await get_and_check_entity(
+        RepositoryVendor,
+        identifier=vendor_name,
+        field_name='name',
+        last_name= vendor_last_name
+    )
+    vendor_share_map = {
+        v.get('id'): v.get('share') for v in vendor_info
+    }
 
-    vendor_names = [v[0] for v in unique_vendor_keys]
-    vendor_last_names = [v[1] for v in unique_vendor_keys]
-    query_vendors = await RepositoryVendor.get_vendor(vendor_names, vendor_last_names)
-    vendor_id_list = [value.id for value in query_vendors]
+    vendor_id_list=[value.get('id') for value in vendor_info]
+    vendor_share_rate=[item['share'] for item in vendor_info]
+    item_price = [int(item.get("price"))
+                  for vendor, products_list in structured_data.items()
+                  for item in products_list ]
+    name_product = [value.get('product_name')
+                    for vendor, products_list in structured_data.items()
+                    for value in products_list]
+    item_count = [int(item.get('count'))
+                  for vendor, products_list in structured_data.items()
+                  for item in products_list ]
+
+    product = await get_and_check_entity(
+        RepositoryProduct,
+        identifier=name_product,
+        field_name='name',
+        vendor_id=vendor_id_list
+    )
+    product_map = {
+        (p.get('name'), p.get('vendor_id')): p for p in product
+    }
+    product_total_price = [int(count) * int(price) for count, price in zip(item_count, item_price)]
 
 
-    for vendor_key, products_list in structured_data.items():
-        vendor_total_price = []
-        vendor_count_product = []
-        vendor_share_company_parcel = []
-        current_vendor_items: List[Dict[str, Any]] = []  # 🛠️ FIX: لیست محلی برای آیتم‌های فروشنده فعلی
+    dictProduct ={'name': name_product,
+                  'price': item_price,
+                  'count': item_count }
+    update=await check_and_buy_item(vendor_id_list,dictProduct,customer_id)
+    if update !=status.HTTP_200_OK:
+        raise HTTPException(status_code=406, detail='موجودی کافی نیست')
+    current_vendor_items: List[Dict[str, Any]] = []
 
-        vendor_name = vendor_key.split('-')[0]
-        vendor_last_name = vendor_key.split('-')[1]
-
-        vendor_info = await get_and_check_entity(
-            RepositoryVendor,
-            identifier=vendor_name,
-            field_name='name',
-            last_name=vendor_last_name
+    for item in list_product:
+        vendor_id = next(
+            (v.get('id') for v in vendor_info if
+             v.get('name') == item['vendor_name'] and v.get('last_name') == item['vendor_last_name']),
+            None
         )
+        print(list_product)
 
-        vendor_id = vendor_info[0].get('id')
-        vendor_share_rate = vendor_info[0].get('share')
+        if vendor_id is None:
+            raise HTTPException(status_code=400, detail=f"غرفه دار {item['vendor_name']} یافت نشد.")
 
-        # 4. حلقه داخلی (به ازای هر آیتم محصول)
-        for item in products_list:
-            # 🛠️ FIX: کوئری تکی محصول (رفع باگ ترتیب دیتابیس)
-            product = await get_and_check_entity(
-                RepositoryProduct,
-                identifier=item['product_name'],
-                field_name='name',
-                vendor_id=vendor_id
-            )
+        vendor_share_rate = vendor_share_map.get(vendor_id, 0)  # نرخ سهم غرفه دار
 
+        product_key = (item['product_name'], vendor_id)
+        db_product = product_map.get(product_key)
 
-            # فرض: محصول با موفقیت پیدا شده است
-            product_data = product[0]
+        if not db_product:
+            raise HTTPException(status_code=400, detail=f"محصول {item['product_name']} برای غرفه دار یافت نشد.")
 
-            # محاسبات
-            item_price = int(item['price'])
-            item_count = int(item['count'])
-            product_total_price = item_count * item_price
-            product_share_cost = decimal.Decimal(product_total_price) * decimal.Decimal(vendor_share_rate)
+        product_price = db_product.get("price")
+        item_count = item['count']
 
-            # تجمیع محلی
-            vendor_count_product.append(item_count)
-            vendor_share_company_parcel.append(product_share_cost)
-            vendor_total_price.append(product_total_price)
+        total_item_price = product_price * item_count
+        share_company_cost = decimal.Decimal(total_item_price) * decimal.Decimal(vendor_share_rate)
 
-            # ساخت آیتم مرسوله
-            parcel_item_data = {
-                'product_id': product_data['id'],
-                'price': product_data['price'],
-                'count': item_count,
-                'share_company': product_share_cost,
-                'vendor_id': vendor_id,
-            }
-            current_vendor_items.append(parcel_item_data)
-
-        # 5. ساخت دیکشنری مرسوله (Parcel)
-        sum_total_price = sum(vendor_total_price)
-        sum_count_product = sum(vendor_count_product)
-        sum_share_company = sum(vendor_share_company_parcel)
-
-        production = {
+        parcel_item_data = {
+            'product_id': db_product.get('id'),
+            'price': product_price,
+            'count': item_count,
+            'share_company': share_company_cost,
             'vendor_id': vendor_id,
-            'customer_id': get_customer[0].get('id'),
-            'price': sum_total_price,
-            'count': sum_count_product,
-            'share_company': sum_share_company,
-            'invoice_id': get_invoice[0].id,
-            'created_at': datetime.datetime.now(),
-            'origin':  get_customer[0].get('city'),
-            'status': EnumInvoice.PARCEL_AWAIT_FOR_CONFIRM,
-            'delivery': EnumInvoice.STATUS_DELIVERY,
-            'methodpost': EnumInvoice.METHOD_POST
         }
-        productive.append(production)
-        total_amount += sum_total_price
-        total_item_count += sum_count_product
-        total_share_company += sum_share_company
-        get_parcel = await RepositoryParcel.get_parcel(vendor_id=[vendor_id], customer_id= get_customer[0].get('id'))
-        print(get_parcel)
-        if not get_parcel:
-            create_parcels = await RepositoryParcel.create_return_many(productive)
-            new_parcel_id = create_parcels[0].id
-            for item_data in current_vendor_items:
-                item_data['parcel_id'] = new_parcel_id
-                current_parcelItem_data.append(item_data)
 
-            get_parcel = create_parcels
-        else:
-            existing_parcel_id = get_parcel[0].id
+        current_vendor_items.append(parcel_item_data)
+        total_amount += total_item_price
+        total_item_count += item_count
+        total_share_company += share_company_cost    #
 
-            for item_data in current_vendor_items:
-                item_data['parcel_id'] = existing_parcel_id
-            await RepositoryItem.create_return_many(current_vendor_items)
+    production = {
+        'vendor_id': vendor_id,
+        'customer_id': customer_id,
+        'price': total_amount,
+        'count':total_item_count,
+        'share_company': total_share_company,
+        'invoice_id': get_invoice[0].id,
+        'created_at': datetime.datetime.now(),
+        'origin':  customer_origin,
+        'status': EnumInvoice.PARCEL_AWAIT_FOR_CONFIRM,
+        'delivery': EnumInvoice.STATUS_DELIVERY,
+        'methodpost': EnumInvoice.METHOD_POST
+    }
+    productive.append(production)
+    get_parcel = await RepositoryParcel.get_parcel(vendor_id=[vendor_id], customer_id=customer_id)
+    print(get_parcel)
+    if not get_parcel:
+        create_parcels = await RepositoryParcel.create_return_many(productive)
+        new_parcel_id = create_parcels[0].id
+        for item_data in current_vendor_items:
+            item_data['parcel_id'] = new_parcel_id
+            current_parcelItem_data.append(item_data)
+
+        get_parcel = create_parcels
+    else:
+        existing_parcel_id = get_parcel[0].id
+
+        for item_data in current_vendor_items:
+            item_data['parcel_id'] = existing_parcel_id
+        await RepositoryItem.create_return_many(current_vendor_items)
+    kafka_manager = kafka()
+    await kafka_manager.start()
+    await kafka_manager.produce(get_parcel)
+    await kafka_manager.stop()
     createProduct = await RepositoryItem.create_return_many(current_parcelItem_data)
+
 
 
     return ProductParcelSchema(
         vendor_id=vendor_id_list,
-        customer_id= get_customer[0].get('id'),
+        customer_id= customer_id,
         price=total_amount,
         count=total_item_count,
         share_company=int(total_share_company),
         invoice_id=get_invoice[0].id,
         created_at=datetime.datetime.now(),
-        origin= get_customer[0].get('city'),
+        origin= customer_origin,
         status=EnumInvoice.PARCEL_AWAIT_FOR_CONFIRM,
         delivery=EnumInvoice.STATUS_DELIVERY,
         methodpost=EnumInvoice.METHOD_POST
@@ -522,6 +550,8 @@ async def cancel_invoice(invoice_id:int,name:str ,last_name:str):
         identifier=invoice_id,
         field_name='id',
     )
+    if execute_customer[0].get('id') != query.customer_id:
+        raise HTTPException(status_code=405 , detail='this invoice not for you')
     parcel_query = await get_and_check_entity(
         RepositoryParcel,
         identifier=invoice_id,
@@ -560,10 +590,7 @@ async def add_confirm(parcel_id: Union[List[str],str] = Query(alias="parcel_id",
 
     if query_parcel[0].get('status') == EnumInvoice.PARCEL_CONFIRM_BY_VENDOR:
         raise HTTPException(status_code=422,detail='this parcel already submitted')
-    kafka_manager = kafka(query_parcel)
-    await kafka_manager.start()
-    await kafka_manager.produce()
-    await kafka_manager.stop()
+
     change_status=await RepositoryParcel.update_by_id(query_parcel[0].get('id'),{'status':EnumInvoice.PARCEL_CONFIRM_BY_VENDOR})
     return  {'message':'with successfully confer'}
 
@@ -660,13 +687,42 @@ async def post_parcel_vendor(name:str,last_name:str):
 
 
 @router.get('/check_parcel_expire/')
-async def check_parcel_expire(parcel_id=int,time=int,name=str ,last_name=str):
-    print(parcel_id,time)
+async def check_parcel_expire(time,parcel_id=Union[List[int],int]):
+    if isinstance(parcel_id, str):
+        parcel_ids = [int(p.strip()) for p in parcel_id.split(',') if p.strip().isdigit()]
+    elif isinstance(parcel_id, list):
+        parcel_ids = []
+        for p in parcel_id:
+            if isinstance(p, str) and ',' in p:
+                parcel_ids.extend([int(x.strip()) for x in p.split(',') if x.strip().isdigit()])
+
+            elif str(p).isdigit():
+                parcel_ids.append(int(p))
+    else:
+        parcel_ids = []
+
     execute =await get_and_check_entity(
         RepositoryParcel,
-        identifier=parcel_id,
+        identifier=parcel_ids,
         field_name='id',
     )
-    print(execute)
-    kafka.produce(parcelId=parcel_id,time=int)
+    kafka_manager =kafka()
+    await kafka_manager.consumer(time,execute)
+    return {'message':'with successfully set time'}
 
+@router.post('/add-product-by-vendor/')
+async def add_product_by_vendor(name:str,last_name:str, data: Dict[str, Any]):
+    get_vendor=await get_and_check_entity(
+        RepositoryVendor ,
+        identifier=name,
+        field_name='name',
+        last_name=last_name
+    )
+    valueProduct = {
+        'vendor_id':get_vendor[0].get("id"),
+        'name':data.get('parcel').get('nameProduct'),
+        'count':int(data.get('parcel').get('number')),
+        'price':int(data.get('parcel').get('price')),
+        'created_at':datetime.datetime.now(),
+    }
+    addProduct = await RepositoryProduct.create_return(valueProduct)
