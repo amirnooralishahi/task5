@@ -4,7 +4,7 @@ __pycache__/
 .eggs
 .idea/
 .idea
-templates/node_modules
-templates/package-lock.json
-templates/package.json
+src/templates/node_modules
+src/templates/package-lock.json
+src/templates/package.json
 connect.py
