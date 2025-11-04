@@ -11,7 +11,6 @@ fetch('http://127.0.0.1:8000/parcel/vendor/list_product/')
         let container = document.getElementById('product_list_container');
         let productList = document.getElementById('product_list');
         let addParcel = {}; 
-        console.log(products);
         
         for (let i = 0; i < Object.keys(products).length; i++) {
             const nameVendorian = vendorData[i][i].nameVendor + '-' + vendorData[i][i].lastNameVendor; 
@@ -20,7 +19,6 @@ fetch('http://127.0.0.1:8000/parcel/vendor/list_product/')
             addParcel[nameVendorian] = [];
         }
             let countProduct = 0; 
-        console.log(vendorData[i][i]);
             
             const newProduct = {
                 product_name: vendorData[i][i].nameProduct, 
@@ -59,14 +57,12 @@ fetch('http://127.0.0.1:8000/parcel/vendor/list_product/')
 
             icons.className = 'd-flex gap-3'
             divFull.appendChild(icons)
-            divFull.className = 'd-flex flex-column gap-3 align-items-center'
+            divFull.className = ''
             
-            // --- Event Listeners ---
             IconPlus.addEventListener('click', (event) => {
                 event.preventDefault();
                 countProduct++;
                 count.innerHTML = countProduct;
-                // به‌روزرسانی مقدار count در شیء اصلی addParcel
                 productReference.count = countProduct; 
             });
             IconPlus.style.cursor = "pointer"
@@ -79,10 +75,12 @@ fetch('http://127.0.0.1:8000/parcel/vendor/list_product/')
             });
             IconMin.style.cursor = "pointer"
 
-            divFull.className = 'd-flex flex-column gap-3'
+            divFull.className = 'col-3 d-flex flex-column border   align-items-center'
             container.appendChild(divFull)
-            container.className = 'd-flex gap-3'
+            container.className = 'row'
+
         }
+
 
         // --- منطق ارسال ---
         let formName = document.getElementById('form-name');
@@ -133,7 +131,8 @@ fetch('http://127.0.0.1:8000/parcel/vendor/list_product/')
                     return res.json();
                 })
                 .then(data => {
-                    console.log('✅ ثبت مرسوله:', data)
+                    let showProduct =document.getElementById('showProduct')
+                    showProduct.innerHTML = 'با موفقیت ثبت شد '
                     
                 })
                 .catch(err => {
@@ -362,7 +361,6 @@ butClick.addEventListener('click', async (event) => {
                 const res = await fetch(`http://127.0.0.1:8000/parcel/post_vendor/?name=${parcelSend['name']}&last_name=${parcelSend['last_name']}`);
                 const data = await res.json();
                 alert('سفارش در حالت ارسال قرار گرفت ✅');
-                console.log(data);
             });
             div.appendChild(button);
             showParcel.appendChild(div);

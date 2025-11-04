@@ -25,7 +25,7 @@ class getShowItemToVendorController():
                         field_name='vendor_id',
                         error_message='this parcel is not exist'
                     )
-                    print(execute_parcel)
+                    # print(execute_parcel)
                     list_product= []
                     id_parcelItem = [id['id'] for id in execute_parcel]
 
@@ -44,14 +44,16 @@ class getShowItemToVendorController():
 
                     name_product=[value['name'] for value in execute_product]
                     price_product=[value['price'] for value in execute_product]
+
                     for value in execute_parcel:
+                        id= value['id']
                         price_parcel=value['price']
                         count_parcel = value['count']
                         status_parcel = value['status']
                         origin_parcel = value['origin']
 
                         show = ShowParcel(
-                            id = id_parcelItem,
+                            id = id,
                             TotalPrice =price_parcel,
                             price = price_product,
                             nameProduct = name_product,

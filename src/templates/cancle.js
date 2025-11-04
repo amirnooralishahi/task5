@@ -22,7 +22,6 @@ subcancleParcel.addEventListener('click', async (event) => {
         let data = {};
         const res = await fetch(url);
         data = await res.json();
-        console.log(res.status);
     
     
         const details = [

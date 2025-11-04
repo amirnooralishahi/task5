@@ -12,53 +12,10 @@
 </head>
 
 <body class="overflow-x-hidden">
-    <div class="header">
-        <div class="header-contains">
-            <div class="add-item d-flex gap-5">
-                <div class="add-item-container d-flex flex-column gap-4">
-                    <span class="text-center">اضافه کردن آیتم </span>
-                    <div class="form">
-                        <form action="index.html" id="parcel"
-                            class="row d-flex gap-2 justify-content-center align-items-center">
-                            <div class="col-6 d-flex gap-2">
-                                <label for="vendor_id">vendor_id</label>
-                                <input type="number" id='vendor_id' name="vendor_id">
-
-                                <label for="customer_id">customer_id</label>
-                                <input type="number" id="customer_id" name="customer_id">
-
-                                <label for="invoice">invoice-id</label>
-                                <input type="number" id='invoice' name="invoice">
-                            </div>
-                            <div class="col-6 d-flex gap-2">
-                                <label for="status">status</label>
-                                <input type="text" id="status" name="status">
-
-                                <label for="count">count</label>
-                                <input type="number" id="count" name='count'>
-
-                                <label for="product_id">product_id</label>
-                                <input type="text" id='product_id' name="product_id">
-                            </div>
-                            <button type="submit">ثبت مرسوله</button>
-
-                        </form>
-
-                    </div>
-                    <br>
-                    <hr>
-                </div>
-
-            </div>
-
-
-
-        </div>
-    </div>
-    </div>
     <div class="customer">
-        <div class="customer-container  ">
-            
+        <div class="customer-container   d-flex flex-column align-items-center">
+        <h3>خرید محصول</h3>
+
             <form action="index.html" id="form-name">
                 <div class="name">
                     <label for="name">first_name</label>
@@ -70,11 +27,12 @@
                 </div>
                 
             </form>
-            <div class="list_product " id="product_list">
-                    <div  id="product_list_container" class="d-flex border border-black">
-
+            <div class="list_product w-100  border border-black" id="product_list">
+                    <div  id="product_list_container" class="">
+                            
                     </div>
                     <button class="confirmListProduct">click me</button>
+                    <div id="showProduct"></div>
                 </div>
         </div>
     </div>
@@ -187,7 +145,8 @@
     
     
     <div class="send-parcel">
-        <div class="send-parcel-container"> 
+        <div class="send-parcel-container d-flex flex-column align-items-center"> 
+            <h3>invoice نام غرفه دار را وارد کنید سپس شماره </h3>
             <form action="" id="sendParcel">
                 <label for="name">first_name</label>
                 <input type="text" name="name">
@@ -258,7 +217,7 @@
                     </div>
                     <button class="sendInfo">click me</button>
                 </form>
-             <div id="listShowAdd"></div>
+             <div id="listShowAdd" class="d-flex"></div>
 
              </div>
         </div>

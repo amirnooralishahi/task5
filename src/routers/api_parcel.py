@@ -52,15 +52,15 @@ async def all_list_product():
     return  await AllListProductController.process()
 @router.get('/parcel-customer/')
 async def get_parcel_for_customer(name:str , last_name:str):
-    return  getShowItemToCustomer(name=name , last_name= last_name).process()
+    return await getShowItemToCustomer(name=name , last_name= last_name).process()
 
 
 @router.get('/parcel/',response_model=ShowCancelParcel)
 async def cancel_one_parcel(parcel_id: int,name:str , last_name:str):
-        return cancelOneParcelController(parcel_id=parcel_id, name=name, last_name=last_name).process()
+        return await cancelOneParcelController(parcel_id=parcel_id, name=name, last_name=last_name).process()
 @router.get('/parcel-vendor/')
 async def get_parcelItem_for_vendor(name:str , last_name:str):
-        return getShowItemToVendorController(name=name,last_name=last_name).process()
+        return await getShowItemToVendorController(name=name,last_name=last_name).process()
 
 @router.post('/add_parcel/')
 async def add_item_parcel(name: str, last_name: str, data: Dict[str, Dict[str, Any]] = CreateParcelSchema):
@@ -68,19 +68,19 @@ async def add_item_parcel(name: str, last_name: str, data: Dict[str, Dict[str, A
 
 @router.get('/cancel_invoice/',response_model=ShowCancelInvoice)
 async def cancel_invoice(invoice_id:int,name:str ,last_name:str):
-        return  cancelInvoice(name=name,last_name=last_name,invoice=invoice_id).process()
+        return await  cancelInvoice(name=name,last_name=last_name,invoice=invoice_id).process()
 
 
 @router.get('/submit/')
 async def add_confirm(parcel_id: Union[List[int],int] = Query(alias="parcel_id",description='list of parcel id for confirm')) :
-    return addConfrim(parcel_id=parcel_id).process()
+    return await addConfrim(parcel_id=parcel_id).process()
 
 
 
 
 @router.get('/set_share/')
 async def set_share(vendor_id:int,num: int ):
-        return setShare(vendor_id=vendor_id, num=num).process()
+        return await setShare(vendor_id=vendor_id, num=num).process()
 
 @router.get('/list_vendor/')
 async def list_vendor():
@@ -89,12 +89,12 @@ async def list_vendor():
 
 @router.get('/post_vendor/',response_model=ShowPostVendor)
 async def post_parcel_vendor(name:str,last_name:str):
-    return PostParcelVendorController(name=name,last_name=last_name).process()
+    return await PostParcelVendorController(name=name,last_name=last_name).process()
 
 
 @router.get('/check_parcel_expire/')
 async def check_parcel_expire(time,parcel_id=Union[List[int],int]):
-        return  checkParcelExpire(time=time , parcel_id=parcel_id).process()
+        return await checkParcelExpire(time=time , parcel_id=parcel_id).process()
 
 @router.post('/add-product-by-vendor/',response_model=SchemaAddItem.AddProductItem)
 async def add_product_by_vendor(name:str,last_name:str, data: Dict[str, Any]):

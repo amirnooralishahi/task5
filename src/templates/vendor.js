@@ -166,7 +166,6 @@ submit_name_vendors.addEventListener('click', async (event) => {
             parcelContainer.addEventListener('click', (event) => {
                 event.preventDefault();
                 parcelIdToSelect.push(data.id[i])
-                console.log(number);
                 
                 const index = selectedParcelIdss.indexOf(parcelIdToSelect);
 
@@ -240,6 +239,7 @@ sendNumButton.addEventListener('click', async (event) => {
 
 
 //add product to basket product  
+                let listShowAdd=document.getElementById('listShowAdd') 
 
 let form_product=document.getElementById('form-product')
 let productView= document.getElementById('productView')
@@ -251,10 +251,8 @@ subProduct.addEventListener('click',async (event)=>{
     let addProduct = {}
     for (var [key,value] of dataProduct.entries()){
         parcel[key]=value
-        console.log(parcel);
         
     }
-    console.log(parcel);
     
     try{
         fetch(`http://127.0.0.1:8000/parcel/add-product-by-vendor/?name=${parcel['name']}&last_name=${parcel['last_name']}`,{
@@ -264,18 +262,25 @@ subProduct.addEventListener('click',async (event)=>{
             }).then(res =>{ 
                 
             return res.json()}).then(data=>{
-                let listShowAdd=document.getElementById('listShowAdd') 
-                for (let i =0 ; data.length ; i++){ 
 
-                    let divName = document.createElement('div')
-                    divName.innerHTML = data.nameProduct
+                for (let i =0 ;i<Object.keys(data).length  ; i++){ 
+
                     let divPrice = document.createElement('div')
-                    divPrice.innerHTML= data.price 
+                    divPrice.innerHTML= data.price
+                    divPrice.className='col-4' 
                     let count = document.createElement('div')
                     count.innerHTML = data.count
-                    listShowAdd.appendChild(count)
-                    listShowAdd.appendChild(divPrice)
+                    count.className='col-4' 
+                    
+                    let divName = document.createElement('div')
+                    divName.innerHTML = data.name_product
+                    divName.className='col-4' 
+                    
                     listShowAdd.appendChild(divName)
+                    listShowAdd.appendChild(divPrice)
+                    listShowAdd.appendChild(count)
+                    listShowAdd.className= 'row d-flex gap-4'
+                    
                 }
                 
 

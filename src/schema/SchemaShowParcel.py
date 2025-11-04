@@ -12,7 +12,7 @@ class ShowParcel(BaseModel):
     nameProduct :List[str]|str
     count : List[int]|int
     status:List[str]|str
-    origin: List[str]|str
+    origin: List[str]|str=None
 
 class ShowCancelParcel(BaseModel):
     TotalPrice: int

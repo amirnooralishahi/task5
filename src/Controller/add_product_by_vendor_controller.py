@@ -4,6 +4,7 @@ from typing import Dict, Any
 from hepler.helper_parcel import get_and_check_entity
 from src.repository.Vendor import RepositoryVendor
 from src.repository.product import RepositoryProduct
+from src.schema.SchemaAddItem import AddProductItem
 
 
 class addProductByVendor:
@@ -29,4 +30,10 @@ class addProductByVendor:
             'price': int(self.data.get('parcel').get('price')),
             'created_at': datetime.now(),
         }
-        addProduct = await RepositoryProduct.create_return(valueProduct)
+        await RepositoryProduct.create_return(valueProduct)
+        return AddProductItem(
+            name_product=valueProduct.get('name'),
+            count = valueProduct.get('count'),
+            price = valueProduct.get('price'),
+            vendor_id= valueProduct.get('vendor_id'),
+        )
