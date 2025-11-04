@@ -22,8 +22,8 @@ from orm.src.backbone_orm.relation_applier import RelationApplier
 from orm.src.backbone_orm.query_builder_abstract import QueryBuilderAbstract, V, BaseQueryBuilder
 from orm.src.backbone_orm.model_abstract import T
 from orm.src.backbone_orm.relation import Relation, BelongsTo, HasOne, HasMany, BelongsToMany
-from schema.SchemaInvoice import CreateInvoiceSchema
-from models.invoice_model import invoice
+from src.schema.SchemaInvoice import CreateInvoiceSchema
+from src.models.invoice_model import invoice
 class RepositoryInvoice(ABC, Generic[T, V]):
 
     @classmethod

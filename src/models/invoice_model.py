@@ -2,13 +2,13 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Optional, TYPE_CHECKING, Any, List, Dict
 
-from models.model_abstract import ModelAbstract
+from src.models.model_abstract import ModelAbstract
 
 
 
 class invoice(ModelAbstract):
     def repository(self) -> Any:
-        from repository.Invoice import RepositoryInvoice
+        from src.repository.Invoice import RepositoryInvoice
         return RepositoryInvoice
 
     id : int

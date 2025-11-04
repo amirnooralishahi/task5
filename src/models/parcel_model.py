@@ -3,14 +3,14 @@ from __future__ import annotations
 from datetime import datetime
 from decimal import Decimal
 from typing import Optional, TYPE_CHECKING, Any, List, Dict
-from models.model_abstract import ModelAbstract
+from src.models.model_abstract import ModelAbstract
 
 
 
 
 class ParcelModel(ModelAbstract):
     def repository(self) -> Any:
-        from repository.parcelRepo import RepositoryParcel
+        from src.repository.parcelRepo import RepositoryParcel
         return  RepositoryParcel
     id : int
     vendor_id : int

@@ -7,6 +7,7 @@ class listVendor:
     def __init__(self):
         pass
 
+    @classmethod
     async def process(self):
         execute = await  RepositoryVendor.all()
         vendor_list = []

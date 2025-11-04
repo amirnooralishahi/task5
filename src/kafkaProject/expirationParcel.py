@@ -3,9 +3,9 @@ import datetime
 import json
 from aiokafka import AIOKafkaProducer, AIOKafkaConsumer
 
-from Enum.EnumInvoice import EnumInvoice
+from src.Enum.EnumInvoice import EnumInvoice
 from hepler.helper_parcel import get_and_check_entity, get_and_update
-from repository.parcelRepo import RepositoryParcel
+from src.repository.parcelRepo import RepositoryParcel
 
 
 class kafka:

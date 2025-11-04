@@ -1,15 +1,15 @@
 ﻿from http.client import HTTPException
 from typing import Type, Any, List, Dict
 
-from Enum.EnumInvoice import EnumInvoice
+from src.Enum.EnumInvoice import EnumInvoice
 from orm.src.backbone_orm import Parameters
 from orm.src.backbone_orm.repository_abstract import RepositoryAbstract
-from repository.Customer import RepositoryCustomer
-from repository.parcelItem import RepositoryItem
-from repository.parcelRepo import RepositoryParcel
+from src.repository.Customer import RepositoryCustomer
+from src.repository.parcelItem import RepositoryItem
+from src.repository.parcelRepo import RepositoryParcel
 from fastapi import HTTPException,status
 
-from repository.product import RepositoryProduct
+from src.repository.product import RepositoryProduct
 
 
 async def get_and_check_entity(repository: Type[RepositoryAbstract],

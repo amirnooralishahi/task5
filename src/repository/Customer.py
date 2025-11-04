@@ -3,11 +3,12 @@ import pickle
 from abc import ABC, abstractmethod
 from typing import Dict, List, Type, Union, Generic, Optional, Any, Callable, Iterable
 
-from models.customer_model import  customer
+from src.models.customer_model import  customer
 from orm.set.postgres_manager import ConnectionConfig
 from orm.src.backbone_orm import PostgresManager
-from schema.SchemaParcel import ProductParcelSchema
-from schema.SchemaParcelItem import CreateParcelItemSchema
+from src.repository.parcelRepo import RepositoryParcel
+from src.schema.SchemaParcel import ProductParcelSchema
+from src.schema.SchemaParcelItem import CreateParcelItemSchema
 
 try:
     from aioredis import Redis
@@ -18,7 +19,7 @@ import inflect
 
 from pypika import Table, Field, functions
 from pypika.queries import QueryBuilder
-from models.parcelItem_model import parcelItem
+from src.models.parcelItem_model import parcelItem
 from orm.src.backbone_orm.model_schema_abstract import ModelSchemaAbstract
 from orm.src.backbone_orm.parameters import Parameters
 from orm.src.backbone_orm.postgres_connection import PostgresConnection
@@ -770,7 +771,10 @@ class RepositoryCustomer(ABC, Generic[T, V]):
         return  cls.first(query=query)
 
     @classmethod
-    async def profilingQuery(cls,query:QueryBuilder,params:Parameters):
-
-        connection = await cls.connection(debug=True)
-        execute_query = await cls.ru
+    async def parcel_relation (cls,query:QueryBuilder,params:Parameters):
+        return  HasMany(
+            local_repo=RepositoryCustomer,
+            relation_repo=RepositoryParcel,
+            local_key='id' ,
+            foreign_key='customer_id'
+        )

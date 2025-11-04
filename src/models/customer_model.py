@@ -2,13 +2,13 @@ from __future__ import annotations
 from datetime import datetime
 from decimal import Decimal
 from typing import Optional, TYPE_CHECKING, Any, List, Dict
-from models.model_abstract import ModelAbstract
+from src.models.model_abstract import ModelAbstract
 
 
 
 class customer(ModelAbstract):
     def repository(self) -> Any:
-        from repository.Customer import RepositoryCustomer
+        from src.repository.Customer import RepositoryCustomer
         return RepositoryCustomer
     id :int
     name : str

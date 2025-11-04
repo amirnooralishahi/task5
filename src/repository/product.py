@@ -3,7 +3,7 @@ from abc import ABC
 from typing import Dict, List, Type, Union, Generic, Optional, Any, Callable, Iterable
 from orm.set.postgres_manager import ConnectionConfig
 from orm.src.backbone_orm import PostgresManager
-from models.product_model import productModel
+from src.models.product_model import productModel
 try:
     from aioredis import Redis
 except Exception as ex:

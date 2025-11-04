@@ -5,8 +5,8 @@ from typing import Dict, List, Type, Union, Generic, Optional, Any, Callable, It
 
 from orm.set.postgres_manager import ConnectionConfig
 from orm.src.backbone_orm import PostgresManager
-from schema.SchemaParcel import ProductParcelSchema
-from schema.SchemaParcelItem import CreateParcelItemSchema
+from src.schema.SchemaParcel import ProductParcelSchema
+from src.schema.SchemaParcelItem import CreateParcelItemSchema
 
 try:
     from aioredis import Redis
@@ -17,7 +17,7 @@ import inflect
 
 from pypika import Table, Field, functions
 from pypika.queries import QueryBuilder
-from models.parcelItem_model import parcelItem
+from src.models.parcelItem_model import parcelItem
 from orm.src.backbone_orm.model_schema_abstract import ModelSchemaAbstract
 from orm.src.backbone_orm.parameters import Parameters
 from orm.src.backbone_orm.postgres_connection import PostgresConnection

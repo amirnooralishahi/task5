@@ -4,10 +4,10 @@ import uvicorn
 from fastapi import FastAPI,Request
 from connect import create_db_and_tables
 from orm.src.backbone_orm.repository_abstract import set_global_manager
-from routers.api_parcel import router
+from src.routers.api_parcel import router
 from fastapi.middleware.cors import CORSMiddleware
 from orm.src.backbone_orm.postgres_manager import PostgresManager, ConnectionConfig
-from models import *
+from src.models import *
 
 
 async def startup_event():

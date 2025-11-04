@@ -11,9 +11,7 @@ fetch('http://127.0.0.1:8000/parcel/vendor/list_product/')
         let container = document.getElementById('product_list_container');
         let productList = document.getElementById('product_list');
         let addParcel = {}; 
-        console.log(vendorData);
-        
-        
+        console.log(products);
         
         for (let i = 0; i < Object.keys(products).length; i++) {
             const nameVendorian = vendorData[i][i].nameVendor + '-' + vendorData[i][i].lastNameVendor; 

@@ -1,12 +1,12 @@
 ﻿from typing import List
 
 from hepler.helper_parcel import get_and_check_entity
-from repository.parcelRepo import RepositoryParcel
-from kafkaProject.expirationParcel import kafka
+from src.repository.parcelRepo import RepositoryParcel
+from src.kafkaProject.expirationParcel import kafka
 
 class checkParcelExpire :
 
-    def __init__(self,parcel_id:List[int]|int,time:int)->None:
+    def __init__(self,time:int,parcel_id:List[int]|int)->None:
         self.parcel_id=parcel_id
         self.time=time
 

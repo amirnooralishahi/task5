@@ -2,13 +2,13 @@ from __future__ import annotations
 from datetime import datetime
 from decimal import Decimal
 from typing import Optional, TYPE_CHECKING, Any, List, Dict
-from models.model_abstract import ModelAbstract
+from src.models.model_abstract import ModelAbstract
 
 
 class vendor(ModelAbstract):
 
     def repository(self) -> Any:
-        from repository.Vendor import RepositoryVendor
+        from src.repository.Vendor import RepositoryVendor
         return RepositoryVendor
 
     id: Optional[int]
@@ -20,8 +20,8 @@ class vendor(ModelAbstract):
     city: Optional[str]
     share:Optional[Decimal]
     def parcel_relation(self):
-        from repository.Vendor import RepositoryVendor
-        from repository.parcelRepo import RepositoryParcel
+        from src.repository.Vendor import RepositoryVendor
+        from src.repository.parcelRepo import RepositoryParcel
 
         return RepositoryVendor.has_many(RepositoryParcel, 'vendor_id', 'id')
 

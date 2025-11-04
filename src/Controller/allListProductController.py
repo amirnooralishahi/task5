@@ -8,9 +8,10 @@ class AllListProductController:
     def __init__(self):
         pass
 
-
-    async def process(self):
+    @classmethod
+    async def process(cls):
         all_list = await RepositoryProduct.all()
+        print(all_list)
         vendor_id = [value.vendor_id for value in all_list]
         name_product = [value.name for value in all_list]
         price = [value.price for value in all_list]
@@ -30,5 +31,5 @@ class AllListProductController:
                         'price': price[i],
                     }}
                     listProduct.append(show)
-
+        print(listProduct)
         return listProduct

@@ -5,7 +5,9 @@ from typing import Dict, List, Type, Union, Generic, Optional, Any, Callable, It
 
 from orm.set.postgres_manager import ConnectionConfig
 from orm.src.backbone_orm import PostgresManager
-from repository.Invoice import RepositoryInvoice
+from src.repository.Invoice import RepositoryInvoice
+from src.repository.parcelItem import RepositoryItem
+
 try:
     from aioredis import Redis
 except Exception as ex:
@@ -23,7 +25,7 @@ from orm.src.backbone_orm.relation_applier import RelationApplier
 from orm.src.backbone_orm.query_builder_abstract import QueryBuilderAbstract, V, BaseQueryBuilder
 from orm.src.backbone_orm.model_abstract import T
 from orm.src.backbone_orm.relation import Relation, BelongsTo, HasOne, HasMany, BelongsToMany
-from models.parcel_model import ParcelModel
+from src.models.parcel_model import ParcelModel
 class RepositoryParcel(ABC, Generic[T, V]):
 
     @classmethod
@@ -795,3 +797,6 @@ class RepositoryParcel(ABC, Generic[T, V]):
         query = query.select(cls.table().star)
 
         return await cls.get(query=query)
+    @classmethod
+    async def items(selfcls):
+        return HasMany(relation_repo=RepositoryItem,foreign_key='parcel_id',local_key='id')
