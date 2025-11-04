@@ -769,3 +769,8 @@ class RepositoryCustomer(ABC, Generic[T, V]):
 
         return  cls.first(query=query)
 
+    @classmethod
+    async def profilingQuery(cls,query:QueryBuilder,params:Parameters):
+
+        connection = await cls.connection(debug=True)
+        execute_query = await cls.ru

@@ -17,6 +17,7 @@ from repository.Vendor import RepositoryVendor
 from repository.parcelRepo import RepositoryParcel
 from repository.parcelItem import RepositoryItem
 from repository.product import RepositoryProduct
+from schema import SchemaAddItem
 from schema.SchemShowProduct import ShowProductSchema
 from schema.SchemaParcel import CreateParcelSchema, ProductParcelSchema
 from schema.SchemaSendPostVendor import ShowPostVendor
@@ -282,9 +283,9 @@ async def post_parcel_vendor(name:str,last_name:str):
 
 @router.get('/check_parcel_expire/')
 async def check_parcel_expire(time,parcel_id=Union[List[int],int]):
-        return  checkParcelExpire(time=time,parcel_id=parcel_id)
+        return  checkParcelExpire(time=time , parcel_id=parcel_id)
 
-@router.post('/add-product-by-vendor/')
+@router.post('/add-product-by-vendor/',response_model=SchemaAddItem.AddProductItem)
 async def add_product_by_vendor(name:str,last_name:str, data: Dict[str, Any]):
     get_vendor=await get_and_check_entity(
         RepositoryVendor ,
@@ -292,6 +293,8 @@ async def add_product_by_vendor(name:str,last_name:str, data: Dict[str, Any]):
         field_name='name',
         last_name=last_name
     )
+
+    print(data.get("parcel"))
     valueProduct = {
         'vendor_id':get_vendor[0].get("id"),
         'name':data.get('parcel').get('nameProduct'),
@@ -299,4 +302,12 @@ async def add_product_by_vendor(name:str,last_name:str, data: Dict[str, Any]):
         'price':int(data.get('parcel').get('price')),
         'created_at':datetime.datetime.now(),
     }
+    print(valueProduct)
     addProduct = await RepositoryProduct.create_return(valueProduct)
+    show = SchemaAddItem.AddProductItem(
+        name_product=data.get('parcel').get('nameProduct'),
+        count=int(data.get('parcel').get('number')),
+        price=decimal.Decimal(data.get('parcel').get('price')),
+        vendor_id=get_vendor[0].get("id"),
+    )
+    return show

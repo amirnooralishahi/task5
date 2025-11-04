@@ -262,7 +262,22 @@ subProduct.addEventListener('click',async (event)=>{
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({parcel})
             }).then(res =>{ 
-             res.json()}).then(data=>{
+                
+            return res.json()}).then(data=>{
+                let listShowAdd=document.getElementById('listShowAdd') 
+                for (let i =0 ; data.length ; i++){ 
+
+                    let divName = document.createElement('div')
+                    divName.innerHTML = data.nameProduct
+                    let divPrice = document.createElement('div')
+                    divPrice.innerHTML= data.price 
+                    let count = document.createElement('div')
+                    count.innerHTML = data.count
+                    listShowAdd.appendChild(count)
+                    listShowAdd.appendChild(divPrice)
+                    listShowAdd.appendChild(divName)
+                }
+                
 
              }).catch(err => console.error(err))
     }catch{}

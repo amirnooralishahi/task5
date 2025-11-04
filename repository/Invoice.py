@@ -27,8 +27,8 @@ from models.invoice_model import invoice
 class RepositoryInvoice(ABC, Generic[T, V]):
 
     @classmethod
-    async def connection(cls,*args, **kwargs) -> PostgresConnection:
-        return await PostgresManager(config=ConnectionConfig()).acquire(*args, **kwargs)
+    async def connection(cls,debug:bool=False,*args, **kwargs) -> PostgresConnection:
+        return await PostgresManager(config=ConnectionConfig()).acquire(debug_enabled=debug,*args, **kwargs)
 
     @classmethod
     async def redis(cls) -> Redis:

@@ -122,10 +122,9 @@ fetch('http://127.0.0.1:8000/parcel/vendor/list_product/')
                 // ارسال داده‌های نهایی و فیلتر شده
                 body: JSON.stringify({ data: finalAddParcel }) 
             })
-                .then(res => {
+                .then( (res) => {
                     if(res.status === 400){
                         return res.json().then(errorData => {
-                            // نمایش پیام خطای 400 (مثل موجودی کافی نیست)
                             alert(`خطا: ${errorData.detail}`);
                             return Promise.reject(errorData); // برای پرش به catch
                         });

@@ -4,15 +4,15 @@ from hepler.helper_parcel import get_and_check_entity
 from repository.parcelRepo import RepositoryParcel
 from kafkaProject.expirationParcel import kafka
 
-class checkParcelExpire:
+class checkParcelExpire :
 
-    def __init__(self,parcel_id:List[int]|int,time:int):
+    def __init__(self,parcel_id:List[int]|int,time:int)->None:
         self.parcel_id=parcel_id
         self.time=time
 
 
 
-    async def process(self):
+    async def process(self)->dict:
         if isinstance(self.parcel_id, str):
             parcel_ids = [int(p.strip()) for p in self.parcel_id.split(',') if p.strip().isdigit()]
         elif isinstance(self.parcel_id, list):
