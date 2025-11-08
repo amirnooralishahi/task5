@@ -12,40 +12,6 @@ from fastapi import HTTPException,status
 from src.repository.product import RepositoryProduct
 
 
-async def get_and_check_entity(repository: Type[RepositoryAbstract],
-                               identifier: Any,
-                               field_name: str = 'id',
-                               error_message: str = 'Resource not found',
-                               **kwargs: Any
-                               ):
-    if field_name == 'id' and hasattr(repository, 'find_by_id') and not kwargs and not isinstance(identifier, list):
-        execute_get = await repository.find_by_id(identifier)
-
-
-        if not execute_get:
-            raise HTTPException(status_code=404, detail=error_message)
-        return execute_get
-    query = repository.select_query().select('*')
-
-    if isinstance(identifier, list):
-        query = query.where(repository.field(field_name).isin(identifier))
-    else:
-
-        query = query.where(repository.field(field_name).eq(identifier))
-
-    if kwargs:
-        for key, value in kwargs.items():
-            if isinstance(identifier,list):
-                query = query.where(repository.field(key).isin(value))
-            else:
-                query = query.where(repository.field(key).eq(value))
-
-    execute_query = await repository.execute_and_fetch(query)
-    if not execute_query:
-        raise HTTPException(status_code=404, detail=error_message)
-
-    return execute_query
-
 
 async def get_and_update(repository: Type[RepositoryAbstract],
                          identifier=Any,

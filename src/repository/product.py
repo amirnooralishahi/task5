@@ -4,6 +4,7 @@ from typing import Dict, List, Type, Union, Generic, Optional, Any, Callable, It
 from orm.set.postgres_manager import ConnectionConfig
 from orm.src.backbone_orm import PostgresManager
 from src.models.product_model import productModel
+from fastapi import HTTPException,status
 try:
     from aioredis import Redis
 except Exception as ex:
@@ -760,3 +761,39 @@ class RepositoryProduct(ABC, Generic[T, V]):
         query= query.where(cls.field('name').isin(name))
         query = query.select('*')
         return await cls.get(query)
+
+    @classmethod
+    async def get_and_check_entity(cls,
+                                   identifier: Any,
+                                   field_name: str = 'id',
+                                   error_message: str = 'Resource not found',
+                                   **kwargs: Any
+                                   ):
+        try:
+            if field_name == 'id' and not kwargs and not isinstance(identifier,
+                                                                    list):
+                execute_get = await cls.find_by_id(identifier)
+
+        except ValueError as e:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail={'message': str(e)})
+
+        query = cls.select_query().select('*')
+
+        if isinstance(identifier, list):
+            query = query.where(cls.field(field_name).isin(identifier))
+        else:
+
+            query = query.where(cls.field(field_name).eq(identifier))
+
+        if kwargs:
+            for key, value in kwargs.items():
+                if isinstance(identifier, list):
+                    query = query.where(cls.field(key).isin(value))
+                else:
+                    query = query.where(cls.field(key).eq(value))
+
+        execute_query = await cls.execute_and_fetch(query)
+        if not execute_query:
+            raise HTTPException(status_code=404, detail=error_message)
+
+        return execute_query

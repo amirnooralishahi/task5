@@ -22,32 +22,10 @@ class addItemParcel:
         self.last_name=last_name
         self.data=data
 
-    async def process(self):
-
-        get_customer = await get_and_check_entity(
-            RepositoryCustomer,
-            identifier=self.name,
-            field_name='name',
-            last_name=self.last_name
-        )
-
-        customer_id = get_customer[0].get('id')
-        customer_origin = get_customer[0].get('city')
-        value_invoice = {
-            'customer_id': customer_id,
-            'status': EnumInvoice.INVOICE_AWAIT_FOR_CONFIRM,
-        }
-        day_ago = datetime.now() - timedelta(days=1)
-        get_invoice = await RepositoryInvoice.get_invoice(customer_id=customer_id)
-
-        if not get_invoice:
-            get_invoice = await RepositoryInvoice.create_return(value_invoice)
-
-        elif day_ago.day > get_invoice[-1].created_at.day:
-            get_invoice = await RepositoryInvoice.create_return(value_invoice)
-
+    def __make_invoice_data(self):
         structured_data = {}
         list_product = []
+
         for key, value in self.data.get('data').items():
             structured_data[key] = value
         for vendor, choice_product in structured_data.items():
@@ -61,6 +39,33 @@ class addItemParcel:
                     'price': item.get('price'),
                     'count': item.get('count'),
                 })
+
+    async def process(self):
+
+        get_customer = await get_and_check_entity(
+            RepositoryCustomer,
+            identifier=self.name,
+            field_name='name',
+            last_name=self.last_name
+        )
+
+        customer_id = get_customer[0].get('id')
+        customer_origin = get_customer[0].get('city')
+        get_invoice = await RepositoryInvoice.get_invoice(customer_id=customer_id)
+        day_ago = datetime.now() - timedelta(days=1)
+
+        value_invoice = {
+            'customer_id': customer_id,
+            'status': EnumInvoice.INVOICE_AWAIT_FOR_CONFIRM,
+        }
+
+        if not get_invoice:
+            get_invoice = await RepositoryInvoice.create_return(value_invoice)
+
+        elif day_ago.day > get_invoice[-1].created_at.day:
+            get_invoice = await RepositoryInvoice.create_return(value_invoice)
+
+        self.__make_invoice_data()
 
         total_amount = 0
         total_item_count = 0
