@@ -5,7 +5,7 @@ from repository.Vendor import RepositoryVendor
 from fastapi import HTTPException , status
 
 from repository.product import RepositoryProduct
-from responseSchema.addProduct import ResponseAddProduct
+from responseSchema.add_product import ResponseAddProduct
 
 
 class addProductService(BaseService):
@@ -31,30 +31,28 @@ class addProductService(BaseService):
 
     async def process(self):
         vendor=await self.validate()
-        value_product = {
+        self.value_product = {
             'vendor_id': vendor[0].get("id"),
             'name': self.__data.get('parcel').get('nameProduct'),
             'count': int(self.__data.get('parcel').get('number')),
             'price': Decimal(self.__data.get('parcel').get('price')),
             'created_at': datetime.now()
         }
-        try:
-            create_product = await RepositoryProduct.create_return(value_product)
-            query=RepositoryProduct.select_where(RepositoryProduct.field('id').eq(create_product.id)).select('*')
-            execute_query=await RepositoryProduct.execute_and_fetch(query)
+        await self.fetch_data()
 
 
+        return await self.response()
 
-            show = ResponseAddProduct(
-                **execute_query[0]
-            )
-
-            return show
-        except ValueError as e:
-            raise HTTPException(status_code=404, detail=f'create product failed{e}')
+    async def fetch_data(self):
+        create_product = await RepositoryProduct.create_return(self.value_product)
+        query = RepositoryProduct.select_where(RepositoryProduct.field('id').eq(create_product.id)).select('*')
+        self.execute_query = await RepositoryProduct.execute_and_fetch(query)
 
 
     async def response(self):
-        response = await self.process()
+        show = ResponseAddProduct(
+        **self.execute_query[0]
+        )
+        response = show
         return  response
 

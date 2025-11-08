@@ -4,6 +4,8 @@ let selectedParcelIds = [];
 fetch('http://127.0.0.1:8000/parcel/vendor/list_product/')
     .then((res) => res.json())
     .then(products => {
+        console.log(products);
+        
         // 💡 FIX 1: استخراج شیء داده اصلی از آرایه (products[0])
         const vendorData = products; 
 
@@ -13,7 +15,7 @@ fetch('http://127.0.0.1:8000/parcel/vendor/list_product/')
         let addParcel = {}; 
         
         for (let i = 0; i < Object.keys(products).length; i++) {
-            const nameVendorian = vendorData[i][i].nameVendor + '-' + vendorData[i][i].lastNameVendor; 
+            const nameVendorian = vendorData[i].name_vendor + '-' + vendorData[i].last_name_vendor; 
 
         if (!addParcel[nameVendorian]) {
             addParcel[nameVendorian] = [];
@@ -21,8 +23,8 @@ fetch('http://127.0.0.1:8000/parcel/vendor/list_product/')
             let countProduct = 0; 
             
             const newProduct = {
-                product_name: vendorData[i][i].nameProduct, 
-                price: vendorData[i][i].price, 
+                product_name: vendorData[i].name_product, 
+                price: vendorData[i].price, 
                 count: 0 
             };
 
@@ -34,11 +36,11 @@ fetch('http://127.0.0.1:8000/parcel/vendor/list_product/')
             
             let divFull = document.createElement('div')
             let nameProduct = document.createElement('div')
-            nameProduct.innerHTML = vendorData[i][i].nameProduct
+            nameProduct.innerHTML = vendorData[i].name_product
             divFull.appendChild(nameProduct)
 
             let priceProduct = document.createElement('div')
-            priceProduct.innerHTML = vendorData[i][i].price
+            priceProduct.innerHTML = vendorData[i].price
             divFull.appendChild(priceProduct)
 
             let icons = document.createElement('div')

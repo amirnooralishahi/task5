@@ -1,5 +1,7 @@
 from typing import  Any,  List, Union
 from fastapi import APIRouter,HTTPException,status,Query
+
+from Controller.all_list_product_controller import AllListProductController
 from src.Controller.add_confrim import addConfrim
 from src.Controller.add_product_by_vendor_controller import addProductByVendor
 from src.Controller.cancel_one_parcel_controller import cancelOneParcelController
@@ -11,7 +13,7 @@ from src.schema.SchemaSendPostVendor import ShowPostVendor
 from src.schema.SchemaShowParcel import ShowParcel, ShowCancelParcel, ShowCancelInvoice
 from src.Controller.send_product_to_customer_controller import sendProductToCustomerController
 from src.Controller.get_show_item_to_parcel import getShowItemToVendorController
-from src.Controller.allListProductController import AllListProductController
+from src.Controller.all_list_product_controller import AllListProductController
 from src.Controller.get_show_item_to_customer import getShowItemToCustomer
 from src.Controller.cancel_invoice import  cancelInvoice
 router = APIRouter(
@@ -31,7 +33,8 @@ async def send_product_to_customer(parcel_id:int ):
 
 @router.get('/vendor/list_product/')
 async def all_list_product():
-    return  await AllListProductController.process()
+    response = AllListProductController()
+    return  await response.process()
 @router.get('/parcel-customer/')
 async def get_parcel_for_customer(name:str , last_name:str):
     return await getShowItemToCustomer(name=name , last_name= last_name).process()
