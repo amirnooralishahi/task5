@@ -5,7 +5,7 @@ from typing import Union, List
 
 from ErrorHandling.Exeption import UpdateFailedError
 from src.Enum.EnumInvoice import EnumInvoice
-from hepler.helper_parcel import get_and_check_entity
+
 from src.repository.parcelRepo import RepositoryParcel
 
 
@@ -28,7 +28,7 @@ class addConfrim:
             parcel_ids = []
 
         try:
-            query_parcel = await get_and_check_entity(
+            query_parcel = await RepositoryParcel.get_and_check_entity(
                 RepositoryParcel,
                 identifier=parcel_ids,
             )

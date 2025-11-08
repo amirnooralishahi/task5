@@ -1,5 +1,4 @@
-﻿from hepler.helper_parcel import get_and_check_entity
-from src.repository.Customer import RepositoryCustomer
+﻿from src.repository.Customer import RepositoryCustomer
 from src.repository.Invoice import RepositoryInvoice
 from src.repository.parcelItem import RepositoryItem
 from src.repository.parcelRepo import RepositoryParcel
@@ -12,19 +11,19 @@ class getShowItemToCustomer:
         self.name=name
         self.last_name=last_name
     async def process(self):
-        query_customer =await get_and_check_entity(
+        query_customer =await RepositoryCustomer.get_and_check_entity(
             RepositoryCustomer,
             identifier=self.name,
             field_name='name',
             last_name=self.last_name
         )
-        execute = await get_and_check_entity(
+        execute = await RepositoryInvoice.get_and_check_entity(
             RepositoryInvoice,
             identifier=query_customer[0].get('id'),
             field_name='customer_id',
         )
         invoice_id = execute[0].get('id')
-        execute_parcel = await get_and_check_entity(
+        execute_parcel = await RepositoryParcel.get_and_check_entity(
             RepositoryParcel,
             identifier=invoice_id,
             field_name='invoice_id',
@@ -32,7 +31,7 @@ class getShowItemToCustomer:
         show_list = []
         for item in execute_parcel:
             saveParcelId = item['id']
-            execute_item = await get_and_check_entity(
+            execute_item = await RepositoryItem.get_and_check_entity(
                 RepositoryItem,
                 identifier=saveParcelId,
                 field_name='parcel_id'

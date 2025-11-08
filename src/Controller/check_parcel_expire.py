@@ -1,6 +1,5 @@
 ﻿from typing import List
 
-from hepler.helper_parcel import get_and_check_entity
 from src.repository.parcelRepo import RepositoryParcel
 from src.kafkaProject.expirationParcel import kafka
 
@@ -26,7 +25,7 @@ class checkParcelExpire :
         else:
             parcel_ids = []
 
-        execute = await get_and_check_entity(
+        execute = await RepositoryParcel.get_and_check_entity(
             RepositoryParcel,
             identifier=parcel_ids,
             field_name='id',

@@ -1,32 +1,14 @@
-import datetime
-import decimal
-
-from typing import Dict, Any, Set, Tuple, List, Union
+from typing import  Any,  List, Union
 from fastapi import APIRouter,HTTPException,status,Query
-
 from src.Controller.add_confrim import addConfrim
-from src.Controller.add_item_parcel import addItemParcel
 from src.Controller.add_product_by_vendor_controller import addProductByVendor
 from src.Controller.cancel_one_parcel_controller import cancelOneParcelController
 from src.Controller.check_parcel_expire import checkParcelExpire
 from src.Controller.list_vendor import listVendor
 from src.Controller.post_parcel_vendor_controller import PostParcelVendorController
 from src.Controller.set_share import setShare
-from src.Enum.EnumInvoice import EnumInvoice
-from hepler.helper_parcel import get_and_check_entity, get_item_and_product_details, check_and_buy_item
-from src.repository.Customer import RepositoryCustomer
-from src.repository.Invoice import RepositoryInvoice
-from src.repository.Vendor import RepositoryVendor
-from src.repository.parcelRepo import RepositoryParcel
-from src.repository.parcelItem import RepositoryItem
-from src.repository.product import RepositoryProduct
-from src.schema import SchemaAddItem
-from src.schema.SchemShowProduct import ShowProductSchema
-from src.schema.SchemaParcel import CreateParcelSchema, ProductParcelSchema
 from src.schema.SchemaSendPostVendor import ShowPostVendor
 from src.schema.SchemaShowParcel import ShowParcel, ShowCancelParcel, ShowCancelInvoice
-from src.schema.SchemaVendor import ShowVendorSchema
-from src.kafkaProject.expirationParcel import kafka
 from src.Controller.send_product_to_customer_controller import sendProductToCustomerController
 from src.Controller.get_show_item_to_parcel import getShowItemToVendorController
 from src.Controller.allListProductController import AllListProductController
@@ -62,9 +44,9 @@ async def cancel_one_parcel(parcel_id: int,name:str , last_name:str):
 async def get_parcelItem_for_vendor(name:str , last_name:str):
         return await getShowItemToVendorController(name=name,last_name=last_name).process()
 
-@router.post('/add_parcel/')
-async def add_item_parcel(name: str, last_name: str, data: Dict[str, Dict[str, Any]] = CreateParcelSchema):
-        return  await addItemParcel(name=name, last_name=last_name, data=data).process()
+# @router.post('/add_parcel/')
+# async def add_item_parcel(name: str, last_name: str, data: Dict[str, Dict[str, Any]] = CreateParcelSchema):
+#         return  await addItemParcel(name=name, last_name=last_name, data=data).process()
 
 @router.get('/cancel_invoice/',response_model=ShowCancelInvoice)
 async def cancel_invoice(invoice_id:int,name:str ,last_name:str):
@@ -96,6 +78,7 @@ async def post_parcel_vendor(name:str,last_name:str):
 async def check_parcel_expire(time,parcel_id=Union[List[int],int]):
         return await checkParcelExpire(time=time , parcel_id=parcel_id).process()
 
-@router.post('/add-product-by-vendor/',response_model=SchemaAddItem.AddProductItem)
-async def add_product_by_vendor(name:str,last_name:str, data: Dict[str, Any]):
+@router.post('/add-product-by-vendor/')
+async def add_product_by_vendor(name:str,last_name:str, data:dict[str,Any]):
+           print(name,last_name,data)
            return  await addProductByVendor(name=name,last_name=last_name,data=data).process()

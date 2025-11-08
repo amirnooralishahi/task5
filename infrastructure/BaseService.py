@@ -6,18 +6,13 @@
 class BaseService(ABC):
 
     @abstractmethod
-    def validate (self):
+    async def validate (self):
 
         pass
 
-    @abstractmethod
 
-    def get_data(self):
-        pass
 
     @abstractmethod
-    def process(self):
+    async def process(self):
         pass
-    @abstractmethod
-    def Response_to_controller(self):
-        pass
+

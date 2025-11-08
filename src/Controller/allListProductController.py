@@ -1,17 +1,20 @@
 ﻿from src.repository.Vendor import RepositoryVendor
 from src.repository.product import RepositoryProduct
+from infrastructure.controller import BaseController
 
-class AllListProductController:
+
+
+class AllListProductController(BaseController):
 
 
 
     def __init__(self):
         pass
 
-    @classmethod
-    async def process(cls):
+    def validate(self):
+        pass
+    async def process(self):
         all_list = await RepositoryProduct.all()
-        print(all_list)
         vendor_id = [value.vendor_id for value in all_list]
         name_product = [value.name for value in all_list]
         price = [value.price for value in all_list]
@@ -31,5 +34,4 @@ class AllListProductController:
                         'price': price[i],
                     }}
                     listProduct.append(show)
-        print(listProduct)
         return listProduct

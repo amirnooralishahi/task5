@@ -1,5 +1,4 @@
-﻿from hepler.helper_parcel import get_and_check_entity
-from src.repository.Vendor import RepositoryVendor
+﻿from src.repository.Vendor import RepositoryVendor
 
 
 class setShare:
@@ -11,7 +10,7 @@ class setShare:
 
 
     async def process(self):
-        query_vendor = await get_and_check_entity(
+        query_vendor = await RepositoryVendor.get_and_check_entity(
             RepositoryVendor,
             identifier=self.vendor_id,
         )

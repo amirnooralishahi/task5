@@ -1,5 +1,5 @@
 ﻿from src.Enum.EnumInvoice import EnumInvoice
-from hepler.helper_parcel import get_and_check_entity
+
 from src.repository.Customer import RepositoryCustomer
 from src.repository.Vendor import RepositoryVendor
 from src.repository.parcelRepo import RepositoryParcel
@@ -15,7 +15,7 @@ class PostParcelVendorController:
 
 
     async def process(self):
-        execute = await get_and_check_entity(
+        execute = await RepositoryVendor.get_and_check_entity(
             RepositoryVendor,
             identifier=self.name,
             field_name='name',
@@ -23,14 +23,14 @@ class PostParcelVendorController:
         )
         constFinally = 0
 
-        execute_parcel = await get_and_check_entity(
+        execute_parcel = await RepositoryParcel.get_and_check_entity(
             RepositoryParcel,
             identifier=execute[0].get('id'),
             field_name='vendor_id'
         )
 
         id_invoice = [value.get('invoice_id') for value in execute_parcel]
-        execute_parcel_all = await  get_and_check_entity(
+        execute_parcel_all = await  RepositoryParcel.get_and_check_entity(
             RepositoryParcel,
             identifier=id_invoice,
             field_name='invoice_id'
@@ -46,7 +46,7 @@ class PostParcelVendorController:
                                                               'pricedelivery': 30000})
 
         customer_id = [value.get('customer_id') for value in execute_parcel]
-        query_customer = await get_and_check_entity(
+        query_customer = await RepositoryCustomer.get_and_check_entity(
             RepositoryCustomer,
             identifier=customer_id,
         )

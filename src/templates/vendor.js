@@ -250,11 +250,16 @@ subProduct.addEventListener('click',async (event)=>{
     let parcel ={}
     let addProduct = {}
     for (var [key,value] of dataProduct.entries()){
-        parcel[key]=value
+        parcel[key]=value        
         
     }
     
     try{
+        console.log(parcel['name']);
+        console.log(parcel['last_name']);
+        console.log(parcel);
+
+        
         fetch(`http://127.0.0.1:8000/parcel/add-product-by-vendor/?name=${parcel['name']}&last_name=${parcel['last_name']}`,{
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -262,7 +267,8 @@ subProduct.addEventListener('click',async (event)=>{
             }).then(res =>{ 
                 
             return res.json()}).then(data=>{
-
+                console.log(data);
+                
                 for (let i =0 ;i<Object.keys(data).length  ; i++){ 
 
                     let divPrice = document.createElement('div')

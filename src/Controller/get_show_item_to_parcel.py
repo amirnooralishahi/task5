@@ -1,5 +1,4 @@
-﻿from hepler.helper_parcel import get_and_check_entity
-from src.repository.Vendor import RepositoryVendor
+﻿from src.repository.Vendor import RepositoryVendor
 from src.repository.parcelItem import RepositoryItem
 from src.repository.parcelRepo import RepositoryParcel
 from src.repository.product import RepositoryProduct
@@ -11,7 +10,7 @@ class getShowItemToVendorController():
         self.name=name ,
         self.last_name=last_name
     async def process(self):
-                    execute = await get_and_check_entity(
+                    execute = await RepositoryVendor.get_and_check_entity(
                         RepositoryVendor,
                         identifier=self.name,
                         field_name='name',
@@ -19,7 +18,7 @@ class getShowItemToVendorController():
                         last_name=self.last_name
                     )
                     id_vendor = [id['id'] for id in execute]
-                    execute_parcel = await get_and_check_entity(
+                    execute_parcel = await RepositoryParcel.get_and_check_entity(
                         RepositoryParcel,
                         identifier=id_vendor,
                         field_name='vendor_id',
@@ -29,14 +28,14 @@ class getShowItemToVendorController():
                     list_product= []
                     id_parcelItem = [id['id'] for id in execute_parcel]
 
-                    execute_item = await get_and_check_entity(
+                    execute_item = await RepositoryItem.get_and_check_entity(
                         RepositoryItem,
                         identifier=id_parcelItem,
                         field_name='parcel_id',
                     )
 
                     id_product = [id['product_id'] for id in execute_item]
-                    execute_product = await get_and_check_entity(
+                    execute_product = await RepositoryProduct.get_and_check_entity(
                         RepositoryProduct,
                         identifier=id_product,
 

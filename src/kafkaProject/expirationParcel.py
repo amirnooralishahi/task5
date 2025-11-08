@@ -4,7 +4,7 @@ import json
 from aiokafka import AIOKafkaProducer, AIOKafkaConsumer
 
 from src.Enum.EnumInvoice import EnumInvoice
-from hepler.helper_parcel import get_and_check_entity, get_and_update
+from hepler.helper_parcel import get_and_update
 from src.repository.parcelRepo import RepositoryParcel
 
 

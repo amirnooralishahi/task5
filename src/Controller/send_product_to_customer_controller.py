@@ -1,5 +1,4 @@
-﻿from hepler.helper_parcel import get_and_check_entity
-from src.repository.Invoice import RepositoryInvoice
+﻿from src.repository.Invoice import RepositoryInvoice
 from src.repository.parcelRepo import RepositoryParcel
 from src.schema.SchemaParcel import SendProductToCustomerSchema
 
@@ -14,7 +13,7 @@ class sendProductToCustomerController:
 
 
     async def process(self):
-        get_parcel =await get_and_check_entity(
+        get_parcel =await RepositoryParcel.get_and_check_entity(
             RepositoryParcel,
             self.parcel_id,
             'id',
@@ -22,13 +21,13 @@ class sendProductToCustomerController:
         )
         await RepositoryParcel.update_by_id(self.parcel_id , {'delivery':'ارسال شده توسط غرفه دار'})
         invoice_id = get_parcel[0].get('invoice_id')
-        await get_and_check_entity(
+        await RepositoryInvoice.get_and_check_entity(
             RepositoryInvoice,
             invoice_id,
             'id',
             'this invoice is not exist'
         )
-        get_all_parcel =await get_and_check_entity(
+        get_all_parcel =await RepositoryParcel.get_and_check_entity(
             RepositoryParcel,
             invoice_id,
             'invoice_id'

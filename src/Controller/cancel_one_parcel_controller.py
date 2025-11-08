@@ -1,4 +1,4 @@
-﻿from hepler.helper_parcel import get_and_check_entity, get_item_and_product_details
+﻿from hepler.helper_parcel import get_item_and_product_details
 from src.repository.Customer import RepositoryCustomer
 from src.repository.Vendor import RepositoryVendor
 from src.repository.parcelRepo import RepositoryParcel
@@ -16,13 +16,13 @@ class cancelOneParcelController:
         query_customer = await RepositoryCustomer.get_customer(self.name, self.last_name)
         if query_customer:
             sender = 'مشتری'
-        execute_vendor = await get_and_check_entity(
+        execute_vendor = await RepositoryVendor.get_and_check_entity(
             RepositoryVendor,
             identifier=self.name,
             field_name='name',
             last_name=self.last_name
         )
-        execute = await get_and_check_entity(
+        execute = await RepositoryParcel.get_and_check_entity(
             RepositoryParcel,
             identifier=self.parcel_id,
 
