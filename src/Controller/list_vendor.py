@@ -1,7 +1,5 @@
 ﻿from fastapi import HTTPException,status
-
 from infrastructure.controller import BaseController
-from src.repository.Vendor import RepositoryVendor
 from src.schema.SchemaVendor import ShowVendorSchema
 from src.service.list_vendor import  ListVendorService
 
@@ -33,8 +31,7 @@ class ListVendorController(BaseController):
                     name=item.name,
                     last_name=item.last_name,
                     phone = item.phone,
-                    balance = item.balance,
-
+                    balance = item.balance
                 )
                 list_vendor.append(show)
             return list_vendor

@@ -1,6 +1,6 @@
 ﻿from ValidatePydantic.Schemaproduct import validateVendor
 from infrastructure.controller import BaseController
-from responseSchema.add_product import ResponseAddProduct
+from InputResponseSchema.add_product import ResponseAddProduct
 from src.service.add_product_service import AddProductByVendorService
 from fastapi import HTTPException ,status
 class AddProductByVendor(BaseController):

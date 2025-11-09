@@ -1,26 +1,19 @@
-﻿from src.repository.Vendor import RepositoryVendor
+﻿from InputResponseSchema.set_share_schema import InputSetShareSchema
+from service.set_share_service import SetShareService
+from src.repository.Vendor import RepositoryVendor
+from infrastructure.controller import BaseController
 
 
-class setShare:
+class SetShare(BaseController):
 
-
-    def __init__(self,vendor_id:int,num:int):
+    def __init__(self,vendor_id:InputSetShareSchema,num:InputSetShareSchema):
         self.vendor_id = vendor_id
         self.num = num
 
-
     async def process(self):
-        query_vendor = await RepositoryVendor.get_and_check_entity(
-            RepositoryVendor,
-            identifier=self.vendor_id,
+        service = SetShareService(
+            self.vendor_id,
+            self.num
         )
+        return await service.process()
 
-        percent = self.num / 100
-        name = {query_vendor.name}
-        last_name = {query_vendor.last_name}
-        if query_vendor.share != None:
-            update_share = RepositoryVendor.update_by_id(self.vendor_id, {'share': query_vendor.share})
-            return {'message': f'share {percent} with successfully updated for {name}{last_name} '}
-
-        update_share = await RepositoryVendor.update_by_id(self.vendor_id, {'share': percent})
-        return {'message': f'share {percent} with successfully submit for {name} {last_name} '}

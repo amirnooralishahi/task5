@@ -5,7 +5,7 @@ from repository.Vendor import RepositoryVendor
 from fastapi import HTTPException , status
 
 from repository.product import RepositoryProduct
-from responseSchema.add_product import ResponseAddProduct
+from InputResponseSchema.add_product import ResponseAddProduct
 
 
 class AddProductByVendorService(BaseService):

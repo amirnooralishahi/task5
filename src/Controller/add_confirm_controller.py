@@ -2,7 +2,7 @@
 from typing import Union, List
 from ErrorHandling.Exeption import UpdateFailedError
 from src.Enum.EnumInvoice import EnumInvoice
-from responseSchema.add_confirm import AddConfirm
+from InputResponseSchema.add_confirm import AddConfirm
 from src.repository.parcelRepo import RepositoryParcel
 
 

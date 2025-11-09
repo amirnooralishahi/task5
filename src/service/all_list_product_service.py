@@ -2,7 +2,7 @@
 from infrastructure.BaseService import BaseService
 from repository.Vendor import RepositoryVendor
 from repository.product import RepositoryProduct
-from responseSchema.all_list_product import ResponseAllList
+from InputResponseSchema.all_list_product import ResponseAllList
 
 class allListProductService(BaseService):
 
