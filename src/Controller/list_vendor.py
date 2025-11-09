@@ -14,7 +14,6 @@ class ListVendorController(BaseController):
         try:
             controller =ListVendorService()
             service = controller.process()
-            print(service)
             res =await self.response(service)
             return  res
         except Exception as e:

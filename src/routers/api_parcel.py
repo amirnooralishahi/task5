@@ -9,7 +9,7 @@ from src.Controller.cancel_one_parcel_controller import cancelOneParcelControlle
 from src.Controller.check_parcel_expire import checkParcelExpire
 from src.Controller.list_vendor import ListVendorController
 from src.Controller.post_parcel_vendor_controller import PostParcelVendorController
-from src.Controller.set_share_controller import setShare
+from src.Controller.set_share_controller import SetShare
 from src.schema.SchemaSendPostVendor import ShowPostVendor
 from src.schema.SchemaShowParcel import ShowParcel, ShowCancelParcel, ShowCancelInvoice
 from src.Controller.send_product_to_customer_controller import sendProductToCustomerController
@@ -66,7 +66,7 @@ async def add_confirm(parcel_id: Union[List[int],int] = Query(alias="parcel_id",
 
 @router.get('/set_share/')
 async def set_share(vendor_id:int,num: int ):
-        return await setShare(vendor_id=vendor_id, num=num).process()
+        return await SetShare(vendor_id=vendor_id, num=num).process()
 
 @router.get('/list_vendor/')
 async def list_vendor():

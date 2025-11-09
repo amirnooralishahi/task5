@@ -10,6 +10,7 @@ class InputSetShareSchema(BaseModel):
 
 class ResponseSetShareSchema(BaseModel):
     name:str
-    last_name_vendor: str
+    last_name: str
     city:str
     share:condecimal(max_digits=10, decimal_places=2)
+

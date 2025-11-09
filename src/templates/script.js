@@ -313,6 +313,8 @@ subName.addEventListener('click', async (event) => {
                         fetch(`http://127.0.0.1:8000/parcel/set_share/?vendor_id=${vendor.id}&num=${shareValue}`)
                             .then(res => res.json())
                             .then(data => {
+                                console.log(data);
+                                
                                 const share_vendor = document.getElementById('show-share-vendor');
                                 share_vendor.innerHTML = data.message;
                             });
