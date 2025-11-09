@@ -10,6 +10,14 @@ class BaseService(ABC):
         pass
 
 
+    @abstractmethod
+    def response(self):
+        pass
+
+
+    @abstractmethod
+    async def fetch_data (self):
+        pass
 
     @abstractmethod
     async def process(self):

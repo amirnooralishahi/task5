@@ -2,7 +2,7 @@
 from src.repository.Customer import RepositoryCustomer
 from src.repository.Vendor import RepositoryVendor
 from src.repository.parcelRepo import RepositoryParcel
-from src.schema.SchemaShowParcel import ShowCancelParcel
+from InputResponseSchema.get_show_item_to_vendor_schema import ShowCancelParcel
 
 
 class cancelOneParcelController:

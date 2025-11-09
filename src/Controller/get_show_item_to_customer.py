@@ -3,7 +3,7 @@ from src.repository.Invoice import RepositoryInvoice
 from src.repository.parcelItem import RepositoryItem
 from src.repository.parcelRepo import RepositoryParcel
 from src.repository.product import RepositoryProduct
-from src.schema.SchemaShowParcel import ShowParcel
+from InputResponseSchema.get_show_item_to_vendor_schema import ShowParcel
 
 
 class getShowItemToCustomer:

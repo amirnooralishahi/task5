@@ -3,7 +3,7 @@ from src.Enum.EnumInvoice import EnumInvoice
 from src.repository.Customer import RepositoryCustomer
 from src.repository.Invoice import RepositoryInvoice
 from src.repository.parcelRepo import RepositoryParcel
-from src.schema.SchemaShowParcel import ShowCancelInvoice
+from InputResponseSchema.get_show_item_to_vendor_schema import ShowCancelInvoice
 
 
 class cancelInvoice:
