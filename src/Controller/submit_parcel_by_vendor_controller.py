@@ -1,12 +1,14 @@
 ﻿from fastapi import HTTPException,status
 from typing import Union, List
 from ErrorHandling.Exeption import UpdateFailedError
+from ErrorHandling.decorator import handle_errors
+from service.add_confirm_service import AddConfirmService
 from src.Enum.EnumInvoice import EnumInvoice
 from InputResponseSchema.add_confirm import AddConfirm
 from src.repository.parcelRepo import RepositoryParcel
 
 
-class addConfirm:
+class submitParcelByVendorController:
     def __init__(self,parcel_id:Union[List[int],int]):
         self.parcel_id = parcel_id
 
@@ -28,32 +30,19 @@ class addConfirm:
             return parcel_ids
         except ValueError as e:
             raise HTTPException(status_code=status.HTTP_406_NOT_ACCEPTABLE,detail=f'error during validate add confirm  {e}')
-    async def get_data(self,parcel_ids):
-        try:
-            query_parcel = await RepositoryParcel.get_and_check_entity(
-                RepositoryParcel,
-                identifier=parcel_ids,
-            )
-            change_status = await RepositoryParcel.update_by_id(query_parcel[0].get('id'),
-                                                                {'status': EnumInvoice.PARCEL_CONFIRM_BY_VENDOR})
-            if not change_status:
-                raise HTTPException(status_code=status.HTTP_409_CONFLICT,detail='process update is not successfully')
 
-            return  change_status
-        except Exception as e:
-            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,detail=f'')
+    @handle_errors
+    async def process(self):
+        service = AddConfirmService(self.parcel_id)
+        response= self.response(await service.response())
+        return  response
 
 
     def response(self,data)->dict:
         try:
             data = data
             res=AddConfirm(**data)
-            return res
+
         except Exception as e:
             raise UpdateFailedError(e)
-
-
-    async def process(self):
-        parcel_ids = self.validate()
-        data = await self.get_data(parcel_ids)
-        return  self.response(data)
+        return res

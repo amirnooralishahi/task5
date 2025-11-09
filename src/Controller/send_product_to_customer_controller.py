@@ -1,9 +1,8 @@
-﻿from src.repository.Invoice import RepositoryInvoice
-from src.repository.parcelRepo import RepositoryParcel
+﻿from service.send_product_to_customer_service import SendProductToCustomerService
 from src.schema.SchemaParcel import SendProductToCustomerSchema
 
 
-class sendProductToCustomerController:
+class SendProductToCustomerController:
 
 
     def __init__(self, parcel_id:int):
@@ -13,32 +12,18 @@ class sendProductToCustomerController:
 
 
     async def process(self):
-        get_parcel =await RepositoryParcel.get_and_check_entity(
-            RepositoryParcel,
+        service = SendProductToCustomerService(
             self.parcel_id,
-            'id',
-            'this parceel is not exist'
         )
-        await RepositoryParcel.update_by_id(self.parcel_id , {'delivery':'ارسال شده توسط غرفه دار'})
-        invoice_id = get_parcel[0].get('invoice_id')
-        await RepositoryInvoice.get_and_check_entity(
-            RepositoryInvoice,
-            invoice_id,
-            'id',
-            'this invoice is not exist'
-        )
-        get_all_parcel =await RepositoryParcel.get_and_check_entity(
-            RepositoryParcel,
-            invoice_id,
-            'invoice_id'
-        )
-        value= [await  RepositoryInvoice.update_by_id(invoice_id,{'delivery':'تمامی مرسوله های شما ارسال شده اند'})
-                for index in get_all_parcel
-                for value in index.values() if value =='ارسال شده توسط غرفه دار']
+        response =await self.response(await service.response())
+        return  response
 
-        return SendProductToCustomerSchema(
+    def response(self,data):
+        get_parcel = data
+        show = SendProductToCustomerSchema(
             vendor_id=get_parcel[0].get('vendor_id'),
             parcel_id=get_parcel[0].get('id'),
             invoice_id=get_parcel[0].get('invoice_id'),
             status=get_parcel[0].get('status')
         )
+        return show

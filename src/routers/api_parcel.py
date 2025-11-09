@@ -1,7 +1,7 @@
 from typing import  Any,  List, Union
 from fastapi import APIRouter, Query
 from service.list_vendor import ListVendorService
-from src.Controller.add_confirm_controller import addConfirm
+from src.Controller.submit_parcel_by_vendor_controller import submitParcelByVendorController
 from src.Controller.add_product_by_vendor_controller import AddProductByVendor
 from src.Controller.cancel_one_parcel_controller import cancelOneParcelController
 from src.Controller.check_parcel_expire import checkParcelExpire
@@ -9,7 +9,7 @@ from src.Controller.post_parcel_vendor_controller import PostParcelVendorControl
 from src.Controller.set_share_controller import SetShare
 from src.schema.SchemaSendPostVendor import ShowPostVendor
 from InputResponseSchema.get_show_item_to_vendor_schema import ShowCancelParcel, ShowCancelInvoice
-from src.Controller.send_product_to_customer_controller import sendProductToCustomerController
+from src.Controller.send_product_to_customer_controller import SendProductToCustomerController
 from src.Controller.get_show_item_to_vendor_controller import getShowItemToVendorController
 from src.Controller.all_list_product_controller import AllListProductController
 from src.Controller.get_show_item_to_customer import getShowItemToCustomer
@@ -25,9 +25,11 @@ router = APIRouter(
 "نمایش جزییاس سفارش برای هر فروشنده"
 "امکان تنظیم کارمزد برای هر فروشنده توسط ادمین"
 
+
+#از این استفاده نکردم
 @router.get('send_product_to_customer/{parcel_id}')
 async def send_product_to_customer(parcel_id:int ):
-       return  await sendProductToCustomerController.process(parcel_id)
+       return  await SendProductToCustomerController.process(parcel_id)
 
 @router.get('/vendor/list_product/')
 async def all_list_product():
@@ -55,8 +57,8 @@ async def cancel_invoice(invoice_id:int,name:str ,last_name:str):
 
 
 @router.get('/submit/')
-async def add_confirm(parcel_id: Union[List[int],int] = Query(alias="parcel_id",description='list of parcel id for confirm')) :
-    return await addConfirm(parcel_id=parcel_id).process()
+async def submit_parcel(parcel_id: Union[List[int],int] = Query(alias="parcel_id", description='list of parcel id for confirm')) :
+    return await submitParcelByVendorController(parcel_id=parcel_id).process()
 
 
 
