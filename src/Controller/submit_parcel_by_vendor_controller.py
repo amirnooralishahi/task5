@@ -1,15 +1,12 @@
 ﻿from fastapi import HTTPException,status
-from typing import Union, List
 from ErrorHandling.Exeption import UpdateFailedError
 from ErrorHandling.decorator import handle_errors
 from service.add_confirm_service import AddConfirmService
-from src.Enum.EnumInvoice import EnumInvoice
 from InputResponseSchema.add_confirm import AddConfirm
-from src.repository.parcelRepo import RepositoryParcel
 
 
-class submitParcelByVendorController:
-    def __init__(self,parcel_id:Union[List[int],int]):
+class SubmitParcelByVendorController:
+    def __init__(self,parcel_id):
         self.parcel_id = parcel_id
 
 
@@ -35,14 +32,14 @@ class submitParcelByVendorController:
     async def process(self):
         service = AddConfirmService(self.parcel_id)
         response= self.response(await service.response())
+        print(response, '\n', 'by')
+
         return  response
 
 
-    def response(self,data)->dict:
-        try:
-            data = data
+    def response(self,data):
+            data =data[0]
+            print(data, '\n', 'hi')
             res=AddConfirm(**data)
+            return res
 
-        except Exception as e:
-            raise UpdateFailedError(e)
-        return res

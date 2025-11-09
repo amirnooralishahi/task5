@@ -808,13 +808,6 @@ class RepositoryParcel(ABC, Generic[T, V]):
                                    error_message: str = 'Resource not found',
                                    **kwargs: Any
                                    ):
-        try:
-            if field_name == 'id' and not kwargs and not isinstance(identifier,
-                                                                    list):
-                execute_get = await cls.find_by_id(identifier)
-
-        except ValueError as e:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail={'message': str(e)})
 
         query = cls.select_query().select('*')
 

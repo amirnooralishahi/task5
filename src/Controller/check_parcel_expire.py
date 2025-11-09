@@ -3,7 +3,7 @@
 from src.repository.parcelRepo import RepositoryParcel
 from src.kafkaProject.expirationParcel import kafka
 
-class checkParcelExpire :
+class CheckParcelExpire :
 
     def __init__(self,time:int,parcel_id:List[int]|int)->None:
         self.parcel_id=parcel_id

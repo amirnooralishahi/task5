@@ -1,10 +1,10 @@
 from typing import  Any,  List, Union
 from fastapi import APIRouter, Query
 from service.list_vendor import ListVendorService
-from src.Controller.submit_parcel_by_vendor_controller import submitParcelByVendorController
+from src.Controller.submit_parcel_by_vendor_controller import SubmitParcelByVendorController
 from src.Controller.add_product_by_vendor_controller import AddProductByVendor
 from src.Controller.cancel_one_parcel_controller import cancelOneParcelController
-from src.Controller.check_parcel_expire import checkParcelExpire
+from src.Controller.check_parcel_expire import CheckParcelExpire
 from src.Controller.post_parcel_vendor_controller import PostParcelVendorController
 from src.Controller.set_share_controller import SetShare
 from src.schema.SchemaSendPostVendor import ShowPostVendor
@@ -58,7 +58,7 @@ async def cancel_invoice(invoice_id:int,name:str ,last_name:str):
 
 @router.get('/submit/')
 async def submit_parcel(parcel_id: Union[List[int],int] = Query(alias="parcel_id", description='list of parcel id for confirm')) :
-    return await submitParcelByVendorController(parcel_id=parcel_id).process()
+    return await SubmitParcelByVendorController(parcel_id=parcel_id).process()
 
 
 
@@ -80,7 +80,7 @@ async def post_parcel_vendor(name:str,last_name:str):
 
 @router.get('/check_parcel_expire/')
 async def check_parcel_expire(time,parcel_id=Union[List[int],int]):
-        return await checkParcelExpire(time=time , parcel_id=parcel_id).process()
+        return await CheckParcelExpire(time=time, parcel_id=parcel_id).process()
 
 @router.post('/add-product-by-vendor/')
 async def add_product_by_vendor(name:str,last_name:str, data:dict[str,Any]):
