@@ -15,12 +15,11 @@ class GetShowItemToVendorService(BaseService):
     async def process(self):
         data = await self.fetch_data(self.name,self.last_name)
         return await self.response()
+    @handle_errors
     async def response(self):
         data = await self.fetch_data(self.name,self.last_name)
         product = data.get("product")
         parcel = data.get('parcel')
-        print(product,'\n')
-        print(parcel,'\n')
         name_product = [value['name'] for value in product]
         price_product = [value['price'] for value in parcel]
         list_product =[]

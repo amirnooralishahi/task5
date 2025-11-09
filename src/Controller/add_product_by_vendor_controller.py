@@ -17,13 +17,12 @@ class AddProductByVendor(BaseController):
 
     async def process(self):
         try:
-            add_prodcut=AddProductByVendorService(
+            add_product=AddProductByVendorService(
                 name=self.name,
                 last_name=self.last_name,
                 data=self.__data
-
-            ).process()
-            response = self.response(add_prodcut)
+            )
+            response =await self.response(await add_product.process())
             return response
         except Exception as e:
             raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
