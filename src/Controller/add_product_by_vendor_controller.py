@@ -1,36 +1,39 @@
-﻿from datetime import datetime
-from typing import Dict, Any
-from ValidatePydantic.Schemaproduct import validateVendor
-
-from src.repository.Vendor import RepositoryVendor
-from src.repository.product import RepositoryProduct
-from src.schema.SchemaAddItem import AddProductItem
+﻿from ValidatePydantic.Schemaproduct import validateVendor
 from infrastructure.controller import BaseController
-from src.service.add_product_service import addProductService
+from responseSchema.add_product import ResponseAddProduct
+from src.service.add_product_service import AddProductByVendorService
+from fastapi import HTTPException ,status
+class AddProductByVendor(BaseController):
 
-class addProductByVendor(BaseController):
 
-
-    def __init__(self,name,last_name:validateVendor,data):
+    def __init__(self,name:str,last_name:str,data:validateVendor):
         self.name=name
         self.last_name=last_name
         self.__data=data
 
 
 
-    def validate(self):
-        pass
+
 
     async def process(self):
         try:
-            addProdcut=addProductService(
+            add_prodcut=AddProductByVendorService(
                 name=self.name,
                 last_name=self.last_name,
                 data=self.__data
 
-            )
-
-            return  await addProdcut.response()
-
+            ).process()
+            response = self.response(add_prodcut)
+            return response
         except Exception as e:
-            print(e)
+            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
+
+    async def response(self,data):
+
+                show = ResponseAddProduct(
+                    **data
+                )
+                response = show
+                return response
+
+

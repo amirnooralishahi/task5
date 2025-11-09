@@ -7,7 +7,6 @@ class BaseService(ABC):
 
     @abstractmethod
     async def validate (self):
-
         pass
 
 

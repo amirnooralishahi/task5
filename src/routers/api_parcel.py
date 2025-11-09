@@ -2,13 +2,14 @@ from typing import  Any,  List, Union
 from fastapi import APIRouter,HTTPException,status,Query
 
 from Controller.all_list_product_controller import AllListProductController
-from src.Controller.add_confrim import addConfrim
-from src.Controller.add_product_by_vendor_controller import addProductByVendor
+from service.list_vendor import ListVendorService
+from src.Controller.add_confirm_controller import addConfirm
+from src.Controller.add_product_by_vendor_controller import AddProductByVendor
 from src.Controller.cancel_one_parcel_controller import cancelOneParcelController
 from src.Controller.check_parcel_expire import checkParcelExpire
-from src.Controller.list_vendor import listVendor
+from src.Controller.list_vendor import ListVendorController
 from src.Controller.post_parcel_vendor_controller import PostParcelVendorController
-from src.Controller.set_share import setShare
+from src.Controller.set_share_controller import setShare
 from src.schema.SchemaSendPostVendor import ShowPostVendor
 from src.schema.SchemaShowParcel import ShowParcel, ShowCancelParcel, ShowCancelInvoice
 from src.Controller.send_product_to_customer_controller import sendProductToCustomerController
@@ -58,7 +59,7 @@ async def cancel_invoice(invoice_id:int,name:str ,last_name:str):
 
 @router.get('/submit/')
 async def add_confirm(parcel_id: Union[List[int],int] = Query(alias="parcel_id",description='list of parcel id for confirm')) :
-    return await addConfrim(parcel_id=parcel_id).process()
+    return await addConfirm(parcel_id=parcel_id).process()
 
 
 
@@ -69,7 +70,8 @@ async def set_share(vendor_id:int,num: int ):
 
 @router.get('/list_vendor/')
 async def list_vendor():
-        return   listVendor.process()
+        ser =await ListVendorService().process()
+        return ser
 
 
 @router.get('/post_vendor/',response_model=ShowPostVendor)
@@ -83,5 +85,5 @@ async def check_parcel_expire(time,parcel_id=Union[List[int],int]):
 
 @router.post('/add-product-by-vendor/')
 async def add_product_by_vendor(name:str,last_name:str, data:dict[str,Any]):
-           print(name,last_name,data)
-           return  await addProductByVendor(name=name,last_name=last_name,data=data).process()
+
+           return  await AddProductByVendor(name=name,last_name=last_name,data=data).process()
