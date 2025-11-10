@@ -14,7 +14,7 @@ from InputResponseSchema.cancel_one_parcel_schema import ResponseCancelOneParcel
 from src.Controller.send_product_to_customer_controller import SendProductToCustomerController
 from src.Controller.get_show_item_to_vendor_controller import getShowItemToVendorController
 from src.Controller.all_list_product_controller import AllListProductController
-from src.Controller.get_show_item_to_customer import getShowItemToCustomer
+from src.Controller.get_show_item_to_customer_controller import getShowItemToCustomer
 from src.Controller.cancel_invoice_controller import  cancelInvoice
 router = APIRouter(
     prefix='/parcel',

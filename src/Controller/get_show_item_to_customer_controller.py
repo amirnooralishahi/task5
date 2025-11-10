@@ -29,28 +29,28 @@ class getShowItemToCustomer:
             field_name='invoice_id',
         )
         show_list = []
-        for item in execute_parcel:
-            saveParcelId = item['id']
-            execute_item = await RepositoryItem.get_and_check_entity(
-                RepositoryItem,
-                identifier=saveParcelId,
-                field_name='parcel_id'
-            )
-            count = execute_item[0].get('count')
-            get_product = RepositoryProduct.select_where(
-                RepositoryProduct.field('id').eq(execute_item[0].get('product_id'))).select('*')
-            execute_item = await RepositoryProduct.execute_and_fetch(get_product)
-            name = execute_item[0].get('name')
-            price = (execute_item[0].get('price'))
-            show = ShowParcel(
-                id=saveParcelId,
-                TotalPrice=execute_parcel[0].get('price'),
-                price=price,
-                nameProduct=name,
-                count=count,
-                status=execute_parcel[0].get('status'),
-                origin=execute_parcel[0].get('origin')
-            )
-            show_list.append(show)
+
+        saveParcelId = [value['id'] for value in execute_parcel]
+        execute_item = await RepositoryItem.get_and_check_entity(
+            RepositoryItem,
+            identifier=saveParcelId,
+            field_name='parcel_id'
+        )
+        count = execute_item[0].get('count')
+        get_product = RepositoryProduct.select_where(
+            RepositoryProduct.field('id').eq(execute_item[0].get('product_id'))).select('*')
+        execute_item = await RepositoryProduct.execute_and_fetch(get_product)
+        name = execute_item[0].get('name')
+        price = (execute_item[0].get('price'))
+        show = ShowParcel(
+            id=saveParcelId,
+            TotalPrice=execute_parcel[0].get('price'),
+            price=price,
+            nameProduct=name,
+            count=count,
+            status=execute_parcel[0].get('status'),
+            origin=execute_parcel[0].get('origin')
+        )
+        show_list.append(show)
 
         return show_list
