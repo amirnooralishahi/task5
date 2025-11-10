@@ -55,36 +55,36 @@ async def get_item_and_product_details(parcel_id: int):
     return execute_finally
 
 
-async def check_and_buy_item(vendor_id:List[int]|int,
-                             dict_product:dict
-                             ,customer_id:int):
-
-
-
-        product = await get_and_check_entity(RepositoryProduct,
-                                             identifier=vendor_id,
-                                             field_name='vendor_id',
-                                             name=dict_product.get("name"))
-        customer = await get_and_check_entity(RepositoryCustomer,
-                                          identifier=customer_id)
-
-        price = sum(dict_product.get('price'))
-        print(int(customer.balance))
-        if int(customer.balance) < price:
-            print('balance1')
-            raise HTTPException(status_code=404, detail='موجودی شما کافی نمی باشد')
-        for index,value in enumerate(product):
-                if (value.get('name') in dict_product.get("name")) :
-                    index_number = dict_product.get("name").index(value.get('name'))
-
-                    if (value.get('count') < dict_product.get('count')[index_number]):
-                        print('balance2')
-
-                        raise HTTPException(status_code=404,detail='موجودی محصول کافی نمی باشد')
-                    else:
-                        count=(value.get('count')-dict_product.get("count")[index_number])
-                        await RepositoryProduct.update_by_id(value.get('id'),{'count':count})
-
-        change_balance = int(customer.balance)-price
-        await RepositoryCustomer.update_by_id(customer_id,{'balance':change_balance})
-        return status.HTTP_200_OK
+# async def check_and_buy_item(vendor_id:List[int]|int,
+#                              dict_product:dict
+#                              ,customer_id:int):
+#
+#
+#
+#         product = await get_and_check_entity(RepositoryProduct,
+#                                              identifier=vendor_id,
+#                                              field_name='vendor_id',
+#                                              name=dict_product.get("name"))
+#         customer = await get_and_check_entity(RepositoryCustomer,
+#                                           identifier=customer_id)
+#
+#         price = sum(dict_product.get('price'))
+#         print(int(customer.balance))
+#         if int(customer.balance) < price:
+#             print('balance1')
+#             raise HTTPException(status_code=404, detail='موجودی شما کافی نمی باشد')
+#         for index,value in enumerate(product):
+#                 if (value.get('name') in dict_product.get("name")) :
+#                     index_number = dict_product.get("name").index(value.get('name'))
+#
+#                     if (value.get('count') < dict_product.get('count')[index_number]):
+#                         print('balance2')
+#
+#                         raise HTTPException(status_code=404,detail='موجودی محصول کافی نمی باشد')
+#                     else:
+#                         count=(value.get('count')-dict_product.get("count")[index_number])
+#                         await RepositoryProduct.update_by_id(value.get('id'),{'count':count})
+#
+#         change_balance = int(customer.balance)-price
+#         await RepositoryCustomer.update_by_id(customer_id,{'balance':change_balance})
+#         return status.HTTP_200_OK

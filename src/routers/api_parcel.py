@@ -10,7 +10,7 @@ from src.Controller.check_parcel_expire import CheckParcelExpire
 from src.Controller.post_parcel_vendor_controller import PostParcelVendorController
 from src.Controller.set_share_controller import SetShare
 from src.schema.SchemaSendPostVendor import ShowPostVendor
-from InputResponseSchema.get_show_item_to_vendor_schema import ShowCancelParcel, ShowCancelInvoice
+from InputResponseSchema.cancel_one_parcel_schema import ResponseCancelOneParcel
 from src.Controller.send_product_to_customer_controller import SendProductToCustomerController
 from src.Controller.get_show_item_to_vendor_controller import getShowItemToVendorController
 from src.Controller.all_list_product_controller import AllListProductController
@@ -42,7 +42,7 @@ async def get_parcel_for_customer(name:str , last_name:str):
     return await getShowItemToCustomer(name=name , last_name= last_name).process()
 
 
-@router.get('/parcel/',response_model=ShowCancelParcel)
+@router.get('/parcel/',response_model=ResponseCancelOneParcel)
 async def cancel_one_parcel(parcel_id: int,name:str , last_name:str):
         return await cancelOneParcelController(parcel_id=parcel_id, name=name, last_name=last_name).process()
 @router.get('/parcel-vendor/')

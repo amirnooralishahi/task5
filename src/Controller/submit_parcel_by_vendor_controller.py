@@ -1,8 +1,7 @@
 ﻿from fastapi import HTTPException,status
 from ErrorHandling.decorator import handle_errors
-from service.add_confirm_service import AddConfirmService
 from InputResponseSchema.submit_parcel_by_vendor_schema import AddConfirm
-
+from service.submit_parcel_by_vendor_service import AddConfirmService
 
 class SubmitParcelByVendorController:
     def __init__(self,parcel_id):
