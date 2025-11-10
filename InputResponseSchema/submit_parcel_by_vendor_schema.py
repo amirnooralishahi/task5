@@ -22,6 +22,5 @@ class AddConfirm(BaseModel):
     @field_validator("share_company", mode="before")
     def normalize_decimal(cls, v):
         if isinstance(v, Decimal):
-
             return v.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
         return Decimal(v)

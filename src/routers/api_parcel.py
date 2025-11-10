@@ -13,7 +13,7 @@ from src.Controller.send_product_to_customer_controller import SendProductToCust
 from src.Controller.get_show_item_to_vendor_controller import getShowItemToVendorController
 from src.Controller.all_list_product_controller import AllListProductController
 from src.Controller.get_show_item_to_customer import getShowItemToCustomer
-from src.Controller.cancel_invoice import  cancelInvoice
+from src.Controller.cancel_invoice_controller import  cancelInvoice
 router = APIRouter(
     prefix='/parcel',
     tags=['parcel']

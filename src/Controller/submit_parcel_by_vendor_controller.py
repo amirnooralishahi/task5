@@ -1,8 +1,7 @@
 ﻿from fastapi import HTTPException,status
-from ErrorHandling.Exeption import UpdateFailedError
 from ErrorHandling.decorator import handle_errors
 from service.add_confirm_service import AddConfirmService
-from InputResponseSchema.add_confirm import AddConfirm
+from InputResponseSchema.submit_parcel_by_vendor_schema import AddConfirm
 
 
 class SubmitParcelByVendorController:
@@ -32,14 +31,11 @@ class SubmitParcelByVendorController:
     async def process(self):
         service = AddConfirmService(self.parcel_id)
         response= self.response(await service.response())
-        print(response, '\n', 'by')
-
         return  response
 
 
     def response(self,data):
             data =data[0]
-            print(data, '\n', 'hi')
             res=AddConfirm(**data)
             return res
 
