@@ -2,11 +2,12 @@ import datetime
 import pickle
 from abc import ABC, abstractmethod
 from typing import Dict, List, Type, Union, Generic, Optional, Any, Callable, Iterable
-from fastapi import HTTPException,status
+from fastapi import HTTPException, status
 from orm.set.postgres_manager import ConnectionConfig
 from orm.src.backbone_orm import PostgresManager
 from src.repository.Invoice import RepositoryInvoice
 from src.repository.parcelItem import RepositoryItem
+from Enum.EnumInvoice import EnumInvoice
 
 try:
     from aioredis import Redis
@@ -26,10 +27,12 @@ from orm.src.backbone_orm.query_builder_abstract import QueryBuilderAbstract, V,
 from orm.src.backbone_orm.model_abstract import T
 from orm.src.backbone_orm.relation import Relation, BelongsTo, HasOne, HasMany, BelongsToMany
 from src.models.parcel_model import ParcelModel
+
+
 class RepositoryParcel(ABC, Generic[T, V]):
 
     @classmethod
-    async def connection(cls,*args, **kwargs) -> PostgresConnection:
+    async def connection(cls, *args, **kwargs) -> PostgresConnection:
         return await PostgresManager(config=ConnectionConfig()).acquire(*args, **kwargs)
 
     @classmethod
@@ -44,10 +47,9 @@ class RepositoryParcel(ABC, Generic[T, V]):
     def schema_name(cls) -> str:
         pass
 
-
     @classmethod
     def table_name(cls) -> str:
-        return  'parcel'
+        return 'parcel'
 
     @classmethod
     def model(cls) -> Type[T]:
@@ -62,7 +64,6 @@ class RepositoryParcel(ABC, Generic[T, V]):
         pass
 
     @classmethod
-
     def default_relations(cls) -> List[str]:
         return []
 
@@ -664,10 +665,6 @@ class RepositoryParcel(ABC, Generic[T, V]):
     ):
         return HasMany(cls, repo, foreign_key, local_key, with_trashed, cache_time_in_seconds)
 
-
-
-
-
     @classmethod
     def belongs_to_many(
             cls,
@@ -762,44 +759,41 @@ class RepositoryParcel(ABC, Generic[T, V]):
         relation: Relation = getattr(cls, relation_name + "_relation")()
         relation.forget(model, relation_name)
 
-
     @classmethod
     def invoice_relation(cls):
-        return  cls.belongs_to(RepositoryInvoice,'invoice_id','id')
+        return cls.belongs_to(RepositoryInvoice, 'invoice_id', 'id')
 
     @classmethod
     def parcel_items_relation(cls):
-        return  cls.belongs_to(RepositoryInvoice)
-
-
-
+        return cls.belongs_to(RepositoryInvoice)
 
     @classmethod
-    async  def get_parcel(
+    async def get_parcel(
             cls,
-            parcel_id: Optional[int]=None,
-            invoice_id:  Optional[int] = None,
-            customer_id : Optional[int]=None,
-            vendor_id : Optional[List[int]] =None
+            parcel_id: Optional[int] = None,
+            invoice_id: Optional[int] = None,
+            customer_id: Optional[int] = None,
+            vendor_id: Optional[List[int]] = None
 
     ):
         print(vendor_id)
 
         params = Parameters()
         query = cls.select_query()
-        if invoice_id :
+        if invoice_id:
             query = query.where(cls.field('invoice_id').eq((invoice_id)))
-        if parcel_id :
+        if parcel_id:
             query = query.where(cls.field('id').eq((parcel_id)))
-        if customer_id and vendor_id :
-            query= query.where(cls.field('customer_id').eq((customer_id)))
+        if customer_id and vendor_id:
+            query = query.where(cls.field('customer_id').eq((customer_id)))
             query = query.where(cls.field('vendor_id').isin((vendor_id)))
         query = query.select(cls.table().star)
 
         return await cls.get(query=query)
+
     @classmethod
     async def items(selfcls):
-        return HasMany(relation_repo=RepositoryItem,foreign_key='parcel_id',local_key='id')
+        return HasMany(relation_repo=RepositoryItem, foreign_key='parcel_id', local_key='id')
 
     @classmethod
     async def get_and_check_entity(cls,
@@ -829,3 +823,30 @@ class RepositoryParcel(ABC, Generic[T, V]):
             raise HTTPException(status_code=404, detail=error_message)
 
         return execute_query
+
+    @classmethod
+    async def get_and_update_entity(cls, identifier: Any,  attributes:dict,):
+
+        list_update = []
+        print(identifier)
+        params = Parameters()
+        result = None
+        if isinstance(identifier, list):
+            result = await cls.update(
+                cls.update_query().where(
+                    Field(cls.identifier()).isin(identifier)
+                ),
+                attributes,
+                return_=True,
+                params=params,
+            )
+            return result
+        else:
+            result = await cls.update(
+                cls.update_query().where(
+                    Field(cls.identifier()).eq(identifier),
+                ),
+                attributes,
+                return_=True,
+                params=params)
+            return result

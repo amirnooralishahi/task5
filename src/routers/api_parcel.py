@@ -1,5 +1,7 @@
 from typing import  Any,  List, Union
 from fastapi import APIRouter, Query
+
+from InputResponseSchema.cancel_invoice_schema import ResponseCancelInvoice
 from service.list_vendor import ListVendorService
 from src.Controller.submit_parcel_by_vendor_controller import SubmitParcelByVendorController
 from src.Controller.add_product_by_vendor_controller import AddProductByVendor
@@ -51,7 +53,7 @@ async def get_parcelItem_for_vendor(name:str , last_name:str):
 # async def add_item_parcel(name: str, last_name: str, data: Dict[str, Dict[str, Any]] = CreateParcelSchema):
 #         return  await addItemParcel(name=name, last_name=last_name, data=data).process()
 
-@router.get('/cancel_invoice/',response_model=ShowCancelInvoice)
+@router.get('/cancel_invoice/',response_model=ResponseCancelInvoice)
 async def cancel_invoice(invoice_id:int,name:str ,last_name:str):
         return await  cancelInvoice(name=name,last_name=last_name,invoice=invoice_id).process()
 

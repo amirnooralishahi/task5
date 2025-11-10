@@ -1,13 +1,25 @@
-﻿from ErrorHandling.decorator import handle_errors
+﻿from collections.abc import Mapping
+
+from ErrorHandling.decorator import handle_errors
 from infrastructure.BaseService import BaseService
 from fastapi import HTTPException, status, Response
-from InputResponseSchema.cancel_invoice_schema import ShowCancelInvoice
+from InputResponseSchema.cancel_invoice_schema import ResponseCancelInvoice
 from repository.Customer import RepositoryCustomer
 from repository.Invoice import RepositoryInvoice
 from repository.parcelRepo import RepositoryParcel
 from Enum.EnumInvoice import EnumInvoice
 
 
+def to_dict(obj):
+    if isinstance(obj, dict):
+        return obj
+    if hasattr(obj, "__dict__"):
+        return vars(obj)
+    if hasattr(obj, "_asdict"):
+        return obj._asdict()
+    if isinstance(obj, Mapping):
+        return dict(obj)
+    raise TypeError(f"Cannot convert {type(obj)} to dict")
 class CancelInvoiceService(BaseService):
 
     def __init__(self, name: str, last_name: str, invoice):
@@ -35,12 +47,12 @@ class CancelInvoiceService(BaseService):
         await self.validate()
         await self.fetch_data()
         await self.update_status_invoice()
-        await self.cancel_all_parcel()
+        await self.get_cancel_all_parcel()
         return await self.response()
 
     async def fetch_data(self):
         execute_customer = await RepositoryCustomer.get_and_check_entity(
-            RepositoryCustomer,
+
             identifier=self.name,
             field_name='name',
             last_name=self.last_name
@@ -64,26 +76,39 @@ class CancelInvoiceService(BaseService):
         self.validate_empty(query)
         update_invoice = await RepositoryInvoice.update_return_by_id(id_invoice, {"status": EnumInvoice.INVOICE_CANCEL})
         self.validate_empty(update_invoice)
+
         return update_invoice
 
-    async def cancel_all_parcel(self):
+    async def get_cancel_all_parcel(self):
         data = await self.update_status_invoice()
         list_parcel = []
         self.validate_empty(data)
-        for item in data:
-            self.validate_empty(item)
-            parcel = await RepositoryParcel.update_return_by_id(item.get('id'), {'status': EnumInvoice.PARCEL_CANCEL})
-            list_parcel.append(parcel)
-
+        parcel = await RepositoryParcel.get_parcel(invoice_id=data.id)
+        id_parcel = [value.id for value in parcel]
+        query = await RepositoryParcel.get_and_update_entity(identifier=id_parcel,
+                                                             attributes={'status': EnumInvoice.INVOICE_CANCEL})
+        list_parcel.append(query)
         return list_parcel
+
 
     async def response(self):
         data_update_invoice = await self.update_status_invoice()
-        data_update_parcel = await self.cancel_all_parcel()
-        return ShowCancelInvoice(
-            invoice_id=data_update_invoice[0].get('id'),
-            customer_id=data_update_invoice[0].get('customer_id'),
-            list_parcel=data_update_parcel,
+        data_update_parcel = await self.get_cancel_all_parcel()
+        print(data_update_parcel)
+        if isinstance(data_update_parcel, list) and len(data_update_parcel) == 1 and isinstance(data_update_parcel[0],
+                                                                                                list):
+            data_update_parcel = data_update_parcel[0]
+
+        if not isinstance(data_update_parcel, list):
+            data_update_parcel = [data_update_parcel]
+        for parcel in data_update_parcel:
+            print(to_dict(parcel).get('x_original'))
+        list_parcel = [to_dict(parcel).get('x_original')for parcel in data_update_parcel]
+        print(list_parcel)
+        return ResponseCancelInvoice(
+            invoice_id=data_update_invoice.id,
+            customer_id=data_update_invoice.customer_id,
+            list_parcel=list_parcel,
             status=EnumInvoice.INVOICE_CANCEL
         )
 
